@@ -23,8 +23,13 @@ import javafx.stage.Stage;
  * Break this up into multiple methods and/or classes if it seems appropriate. Promote some of the
  * local variables to fields if needed.
  */
+import java.util.Random;
 public class App extends Application
 {
+    private static final int gridWidth = 10;
+    private static final int gridHeight = 10;
+    private AirportManager airportManager = new AirportManager();
+
     public static void main(String[] args)
     {
         launch();
@@ -36,9 +41,29 @@ public class App extends Application
         // Set up the main "top-down" display area. This is an example only, and you should
         // change this to set it up as you require.
 
-        GridArea area = new GridArea(10, 10);
-        // area.setGridLines(false); // If desired
+        GridArea area = new GridArea(gridWidth, gridHeight);
+        area.setGridLines(false); // If desired
         area.setStyle("-fx-background-color: #006000;");
+
+        Random random = new Random();
+        for (int i = 0; i < 10; i++)
+        {
+            int x = random.nextInt(gridWidth);
+            int y = random.nextInt(gridHeight);
+            String airportName = "Airport " + (i + 1);
+            int airportId = i + 1;
+
+            // Create Airport object
+            Airport newAirport = new Airport(airportId, x, y);
+            airportManager.addAirport(newAirport);            
+
+            // Create and add airport icon to the grid area
+            GridAreaIcon airportIcon = new GridAreaIcon(
+                x, y, 0.0, 1.0, 
+                App.class.getClassLoader().getResourceAsStream("airport.png"),
+                airportName);
+            area.getIcons().add(airportIcon);
+        }
 
         area.getIcons().add(new GridAreaIcon(
             1,   // x
