@@ -41,6 +41,7 @@ public class App extends Application
         // Set up the main "top-down" display area. This is an example only, and you should
         // change this to set it up as you require.
 
+        int nAirports = 0;
         GridArea area = new GridArea(gridWidth, gridHeight);
         area.setGridLines(false); // If desired
         area.setStyle("-fx-background-color: #006000;");
@@ -53,16 +54,26 @@ public class App extends Application
             String airportName = "Airport " + (i + 1);
             int airportId = i + 1;
 
-            // Create Airport object
+            // creating airports
             Airport newAirport = new Airport(airportId, x, y);
             airportManager.addAirport(newAirport);            
 
-            // Create and add airport icon to the grid area
+            // adding airports to grid
             GridAreaIcon airportIcon = new GridAreaIcon(
                 x, y, 0.0, 1.0, 
                 App.class.getClassLoader().getResourceAsStream("airport.png"),
                 airportName);
             area.getIcons().add(airportIcon);
+        }
+
+        // initializing a flight request process for each airport 
+        for (int i = 0; i < 10; i++)
+        {
+            int airportId = i + 1;
+            nAirports = airportManager.getAirportCount();
+            FlightRequest flightRequest = new FlightRequest(nAirports, airportId);
+           System.out.println("Executing command with arguments: " + nAirports + ", " + airportId);
+            new Thread(flightRequest::run).start();
         }
 
         area.getIcons().add(new GridAreaIcon(
@@ -119,5 +130,10 @@ public class App extends Application
         var scene = new Scene(contentPane, 1200, 1000);
         stage.setScene(scene);
         stage.show();
+    }
+
+    public void initializeSim()
+    {
+        
     }
 }
