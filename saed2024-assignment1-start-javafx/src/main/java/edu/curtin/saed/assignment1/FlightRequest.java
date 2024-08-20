@@ -8,6 +8,7 @@ public class FlightRequest implements Runnable
     private int nAirports; // command input
     private int originAirport; // command input
     private BufferedReader reader; // for reading command
+    private AirportManager airportManager;
 
     // constructor
     public FlightRequest(int numberOfAirports, int originAirportID)
@@ -35,12 +36,11 @@ public class FlightRequest implements Runnable
             {
                 int destinationAirportID = Integer.parseInt(line);
                 System.out.println("Received flight request to airport ID: " + destinationAirportID);
-                Airport destinationAirport = null; // TO DO: add a way to get destination airports
+                Airport destinationAirport = airportManager.getAirportById(destinationAirportID);
 
                 // TO DO: add a way to assign FQ to airport's planes
                 System.out.println("Processing flight from airport ID " + originAirport + " to airport ID " + destinationAirportID);
             }
-            System.out.println("Flight requests completed for origin airport ID: " + originAirport);
         }
         catch (IOException e)
         {
