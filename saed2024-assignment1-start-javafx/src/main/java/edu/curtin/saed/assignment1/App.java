@@ -37,7 +37,7 @@ public class App extends Application
         // change this to set it up as you require.
 
         GridArea area = new GridArea(10, 10);
-        // area.setGridLines(false); // If desired
+        area.setGridLines(false); // If desired
         area.setStyle("-fx-background-color: #006000;");
 
         area.getIcons().add(new GridAreaIcon(
