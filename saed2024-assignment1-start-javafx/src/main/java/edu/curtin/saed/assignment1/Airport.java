@@ -10,6 +10,7 @@ public class Airport
     private int x_pos;
     private int y_pos;
     private BlockingQueue<Plane> serviceQueue; // queue for servicing
+    private Map<Integer, Airport> airportMap; // to keep track of airports
 
     // constructor
     public Airport(int id, int x_pos, int y_pos)
