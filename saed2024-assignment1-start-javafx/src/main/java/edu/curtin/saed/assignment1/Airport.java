@@ -10,7 +10,6 @@ public class Airport
     private int x_pos;
     private int y_pos;
     private BlockingQueue<Plane> serviceQueue; // queue for servicing
-    private Map<Integer, Airport> airportMap; // to keep track of airports
 
     // constructor
     public Airport(int id, int x_pos, int y_pos)
@@ -47,15 +46,20 @@ public class Airport
     // code for service simulation
     public void runService(Plane plane)
     {
+        Service service = new Service(this.id, plane.getId());
+        Thread serviceThread = new Thread(service); // make a new thread to run the service on
+        
         try
         {
-        // using sleep to simulate the servicing time
-        Thread.sleep(1000);
-        // TO DO: make service updates print to UI
+            serviceQueue.put(plane); // put the plane that just landed into service queue
+            System.out.println("Plane ID: " + plane.getId() + "added to service queue at airport" + this.id); // for testing, will switch to ui statements later
+            
+            // TO DO: make service updates print to UI
         }
         catch (InterruptedException e)
         {
             Thread.currentThread().interrupt();
+            System.out.println("Failed to add Plane ID: " + plane.getId() + " to service queue at airport ID: " + this.id);
         }
     }
 }

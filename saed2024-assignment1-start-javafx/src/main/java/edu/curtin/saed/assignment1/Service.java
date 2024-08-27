@@ -1,14 +1,11 @@
 package edu.curtin.saed.assignment1;
-import java.util.random.*;
-import java.util.*;
 import java.io.*;
 
 public class Service implements Runnable
 {
     private int planeId; // command input
     private int airportId; // command input
-    private AirportManager airportManager;
-    private BufferedReader reader; // for reading command
+    private BufferedReader br; // for reading command
 
     // constructor
     public Service(int airport_id, int plane_id)
@@ -29,13 +26,12 @@ public class Service implements Runnable
                              String.valueOf(airportId),
                              String.valueOf(planeId)});
                              
-            reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            br = proc.inputReader();
             String line;
             
-            while ((line = reader.readLine()) != null)
+            while ((line = br.readLine()) != null)
             {
-                int destinationAirportID = Integer.parseInt(line);
-                Airport destinationAirport = airportManager.getAirportById(destinationAirportID);
+                String endMessage = line;
 
                 // TO DO: link service to plane/airport/main sim
                 System.out.println("Processing service for plane ID: " + planeId + " at airport ID: " + airportId);

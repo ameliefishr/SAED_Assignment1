@@ -24,6 +24,11 @@ public class Plane implements Runnable
         this.destinationAirport = destination;
     }
 
+    public void setId(int id)
+    {
+        this.id = id;
+    }
+
     public void setX(int x)
     {
         this.x_pos = x;
@@ -32,6 +37,11 @@ public class Plane implements Runnable
     public void setY(int y)
     {
         this.y_pos = y;
+    }
+
+    public int getId()
+    {
+        return id;
     }
 
     public int getX()

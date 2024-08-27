@@ -1,13 +1,11 @@
 package edu.curtin.saed.assignment1;
-import java.util.random.*;
-import java.util.*;
 import java.io.*;
 
 public class FlightRequest implements Runnable
 {
     private int nAirports; // command input
     private int originAirport; // command input
-    private BufferedReader reader; // for reading command
+    private BufferedReader br; // for reading command
     private AirportManager airportManager;
 
     // constructor
@@ -29,10 +27,10 @@ public class FlightRequest implements Runnable
                              String.valueOf(nAirports),
                              String.valueOf(originAirport)});
                              
-            reader = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            br = proc.inputReader();
             String line;
             
-            while ((line = reader.readLine()) != null)
+            while ((line = br.readLine()) != null)
             {
                 int destinationAirportID = Integer.parseInt(line);
                 System.out.println("Received flight request to airport ID: " + destinationAirportID);
