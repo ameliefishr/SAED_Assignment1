@@ -3,16 +3,16 @@ package edu.curtin.saed.assignment1;
 public class Plane implements Runnable
 {
     private int id;
-    private int x_pos;
-    private int y_pos;
+    private int xPos;
+    private int yPos;
     private Airport departingAirport;
     private Airport destinationAirport;
 
-    public Plane(int id, int x_pos, int y_pos, Airport departing)
+    public Plane(int id, int xPos, int yPos, Airport departing)
     {
         this.id = id;
-        this.x_pos = x_pos;
-        this.y_pos = y_pos;
+        this.xPos = xPos;
+        this.yPos = yPos;
         this.departingAirport = departing;
     }
 
@@ -31,12 +31,12 @@ public class Plane implements Runnable
 
     public void setX(int x)
     {
-        this.x_pos = x;
+        this.xPos = x;
     }
 
     public void setY(int y)
     {
-        this.y_pos = y;
+        this.yPos = y;
     }
 
     public int getId()
@@ -46,12 +46,12 @@ public class Plane implements Runnable
 
     public int getX()
     {
-        return x_pos;
+        return xPos;
     }
 
     public int getY()
     {
-        return y_pos;
+        return yPos;
     }
 
     // need to override runnable's run()

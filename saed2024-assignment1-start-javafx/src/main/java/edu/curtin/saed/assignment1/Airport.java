@@ -7,16 +7,16 @@ public class Airport
 {
     // initializing variables
     private int id;
-    private int x_pos;
-    private int y_pos;
+    private int xPos;
+    private int yPos;
     private BlockingQueue<Plane> serviceQueue; // queue for servicing
 
     // constructor
-    public Airport(int id, int x_pos, int y_pos)
+    public Airport(int id, int xPos, int yPos)
     {
         this.id = id;
-        this.x_pos = x_pos;
-        this.y_pos = y_pos;
+        this.xPos = xPos;
+        this.yPos = yPos;
         this.serviceQueue = new LinkedBlockingQueue<>(); // linked blocking queue for producer/consumer scenario
     }
 
@@ -28,12 +28,12 @@ public class Airport
 
     public int getX()
     {
-        return x_pos;
+        return xPos;
     }
 
     public int getY()
     {
-        return y_pos;
+        return yPos;
     }
 
     public BlockingQueue<Plane> getServiceQueue()

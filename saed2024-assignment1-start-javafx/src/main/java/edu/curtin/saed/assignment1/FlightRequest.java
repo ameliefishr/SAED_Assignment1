@@ -5,7 +5,6 @@ public class FlightRequest implements Runnable
 {
     private int nAirports; // command input
     private int originAirport; // command input
-    private BufferedReader br; // for reading command
     private AirportManager airportManager;
 
     // constructor
@@ -19,7 +18,7 @@ public class FlightRequest implements Runnable
     @Override
     public void run()
     {
-        Process proc = null; // for running FQ
+        Process proc; // for running FQ
         try
         {
             System.out.println("Starting flight requests for origin airport ID: " + originAirport);
@@ -28,23 +27,24 @@ public class FlightRequest implements Runnable
                              String.valueOf(nAirports),
                              String.valueOf(originAirport)});
                              
-            br = proc.inputReader();
-            String line;
-            
-            while ((line = br.readLine()) != null)
+            try(BufferedReader br = proc.inputReader())
             {
-                int destinationAirportID = Integer.parseInt(line);
-                System.out.println("Received flight request to airport ID: " + destinationAirportID);
-                Airport destinationAirport = airportManager.getAirportById(destinationAirportID);
-
-                // TO DO: add a way to assign FQ to airport's planes
-                System.out.println("Processing flight from airport ID " + originAirport + " to airport ID " + destinationAirportID);
+                String line;
+                while ((line = br.readLine()) != null)
+                {
+                    int destinationAirportID = Integer.parseInt(line);
+                    System.out.println("Received flight request to airport ID: " + destinationAirportID);
+                    Airport destinationAirport = airportManager.getAirportById(destinationAirportID);
+    
+                    // TO DO: add a way to assign FQ to airport's planes
+                    System.out.println("Processing flight from airport ID " + originAirport + " to airport ID " + destinationAirportID);
+                }
             }
+            
         }
         catch (IOException e)
         {
             System.err.println("Error while running flight requests for origin airport ID: " + originAirport);
-            e.printStackTrace();
         }
     }
 }
