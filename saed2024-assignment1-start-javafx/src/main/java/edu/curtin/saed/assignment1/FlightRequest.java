@@ -9,10 +9,11 @@ public class FlightRequest implements Runnable
     private AirportManager airportManager;
 
     // constructor
-    public FlightRequest(int numberOfAirports, int originAirportID)
+    public FlightRequest(int numberOfAirports, int originAirportID, AirportManager airportManager)
     {
         this.nAirports = numberOfAirports;
         this.originAirport = originAirportID;
+        this.airportManager = airportManager;
     }
 
     @Override
