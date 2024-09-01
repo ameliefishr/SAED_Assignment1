@@ -49,4 +49,17 @@ public class AirportManager
     {
         return airportMap.containsKey(id);
     }
+    
+
+    public void startFlightRequests()
+    {
+        int nAirports = getAirportCount();
+
+        for (Integer airportId : airportMap.keySet())
+        {
+            FlightRequest flightRequest = new FlightRequest(nAirports, airportId, this);
+            System.out.println("Executing command with arguments: " + nAirports + ", " + airportId);
+            new Thread(flightRequest).start();
+        }
+    }
 }

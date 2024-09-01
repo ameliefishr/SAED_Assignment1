@@ -5,15 +5,16 @@ public class Plane implements Runnable
     private int id;
     private int xPos;
     private int yPos;
-    private Airport departingAirport;
+    private Airport currentAirport;
     private Airport destinationAirport;
 
-    public Plane(int id, int xPos, int yPos, Airport departing)
+    public Plane(int id, int xPos, int yPos, Airport currentAirport)
     {
         this.id = id;
         this.xPos = xPos;
         this.yPos = yPos;
-        this.departingAirport = departing;
+        this.currentAirport = currentAirport;
+        this.destinationAirport = null;
     }
 
     // setters & getters
@@ -22,6 +23,11 @@ public class Plane implements Runnable
     public void setDestinationAirport(Airport destination)
     {
         this.destinationAirport = destination;
+    }
+
+    public void setCurrentAirport(Airport currentAirport)
+    {
+        this.currentAirport = currentAirport;
     }
 
     public void setId(int id)
@@ -54,10 +60,27 @@ public class Plane implements Runnable
         return yPos;
     }
 
+    public Airport getDestinationAirport()
+    {
+        return this.destinationAirport;
+    }
+
+    public Airport getCurrentAirport()
+    {
+        return this.currentAirport;
+    }
+
+    public void flyToDestination(Airport destination)
+    {
+        // TO DO: add flight logic here;
+        System.out.println("Plane ID: " + id + " flying to Airport ID: " + destination.getId());
+    }
+
     // need to override runnable's run()
     @Override
     public void run()
     {
-        // TO DO: add flight logic here;
+
+        
     }
 }

@@ -10,6 +10,7 @@ public class Airport
     private int xPos;
     private int yPos;
     private BlockingQueue<Plane> serviceQueue; // queue for servicing
+    private BlockingQueue<Plane> availableQueue; // queue for available planes
 
     // constructor
     public Airport(int id, int xPos, int yPos)
@@ -18,6 +19,7 @@ public class Airport
         this.xPos = xPos;
         this.yPos = yPos;
         this.serviceQueue = new LinkedBlockingQueue<>(); // linked blocking queue for producer/consumer scenario
+        this.availableQueue = new LinkedBlockingQueue<>();
     }
 
     // getters & settters
@@ -41,25 +43,69 @@ public class Airport
         return serviceQueue;
     }
 
+    public BlockingQueue<Plane> getAvailablePlanesQueue()
+    {
+        return availableQueue;
+    }
+
     // so far I have not found a need for airport setters, may add later
 
-    // code for service simulation
-    public void runService(Plane plane)
+    // add planes to queue to get serviced
+    public void addPlaneToServiceQueue(Plane plane)
     {
-        Service service = new Service(this.id, plane.getId());
-        Thread serviceThread = new Thread(service); // make a new thread to run the service on
-        
         try
         {
-            serviceQueue.put(plane); // put the plane that just landed into service queue
-            System.out.println("Plane ID: " + plane.getId() + "added to service queue at airport" + this.id); // for testing, will switch to ui statements later
-            
-            // TO DO: make service updates print to UI
+            serviceQueue.put(plane);
+            System.out.println("Plane ID: " + plane.getId() + " added to service queue at airport ID: " + this.id);
         }
         catch (InterruptedException e)
         {
             Thread.currentThread().interrupt();
             System.out.println("Failed to add Plane ID: " + plane.getId() + " to service queue at airport ID: " + this.id);
         }
+    }
+
+    // code for service simulation
+    public void servicePlane()
+    {
+        
+        try
+        {
+            Plane plane = serviceQueue.take(); // take next plane from service queue
+            Service service = new Service(this.id, plane, availableQueue);
+            Thread serviceThread = new Thread(service);
+            serviceThread.start();
+            // TO DO: make service updates print to UI
+        }
+        catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
+            System.out.println("No planes available for servicing at airport ID: " + this.id);
+        }
+    }
+
+    public void receivePlane(Plane plane)
+    {
+        // if this is not the beginning of the sim
+        if(plane.getDestinationAirport() != null)
+            {
+                plane.setDestinationAirport(null);
+                addPlaneToServiceQueue(plane);
+                servicePlane();
+            }
+
+        // if it is beginning of sim (planes dont need to be serviced)
+        else
+        {
+            try
+            {
+                availableQueue.put(plane);
+            }
+            catch (InterruptedException e)
+            {
+                Thread.currentThread().interrupt();
+            }
+        }
+
     }
 }

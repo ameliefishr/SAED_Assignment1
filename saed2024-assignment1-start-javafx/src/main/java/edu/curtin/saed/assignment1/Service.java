@@ -1,16 +1,22 @@
 package edu.curtin.saed.assignment1;
+
 import java.io.*;
+import java.util.concurrent.BlockingQueue;
 
 public class Service implements Runnable
 {
     private int planeId; // command input
+    private Plane unservicedPlane; // plane object (to add to availableQueue afterwards)
     private int airportId; // command input
+    private BlockingQueue<Plane> availableQueue;
 
     // constructor
-    public Service(int airportID, int planeID)
+    public Service(int airportID, Plane plane, BlockingQueue<Plane> availableQueue)
     {
-        this.planeId = planeID;
+        this.unservicedPlane = plane;
+        this.planeId = plane.getId();
         this.airportId = airportID;
+        this.availableQueue = availableQueue;
     }
 
     @Override
@@ -32,14 +38,17 @@ public class Service implements Runnable
                 while ((line = br.readLine()) != null)
                 {
                     String endMessage = line;
-    
+
                     // TO DO: link service to plane/airport/main sim
-                    System.out.println("Processing service for plane ID: " + planeId + " at airport ID: " + airportId);
+                    System.out.println("Completed service for plane ID: " + planeId + " at airport ID: " + airportId);
                 }
+                availableQueue.put(unservicedPlane);
+                System.out.println("Plane ID: " + unservicedPlane.getId() + " is now available for flights.");
             }
         }
-        catch (IOException e)
+        catch (IOException | InterruptedException e)
         {
+            Thread.currentThread().interrupt();
             System.out.println("Error while running service for plane ID: " + planeId + " at airport ID: " + airportId);
         }
     }

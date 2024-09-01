@@ -41,10 +41,9 @@ public class App extends Application
         // Set up the main "top-down" display area. This is an example only, and you should
         // change this to set it up as you require.
 
-        int nAirports = 0;
         GridArea area = new GridArea(gridWidth, gridHeight);
         area.setGridLines(false); // If desired
-        area.setStyle("-fx-background-color: #006000;");
+        area.setStyle("-fx-background-color: #73c8a1;");
 
         Random random = new Random();
         for (int i = 0; i < 10; i++)
@@ -55,13 +54,14 @@ public class App extends Application
             int airportId = i + 1;
 
             // creating airports (default 10)
+            // airport creation also handles service queue & available queue set-up
             Airport newAirport = new Airport(airportId, x, y);
             airportManager.addAirport(newAirport);            
 
             // adding airports to grid 
             GridAreaIcon airportIcon = new GridAreaIcon(
                 x, y, 0.0, 1.0, 
-                App.class.getClassLoader().getResourceAsStream("airport.png"),
+                App.class.getClassLoader().getResourceAsStream("pokecentre.jpg"),
                 airportName);
             area.getIcons().add(airportIcon);
 
@@ -70,30 +70,22 @@ public class App extends Application
             {
                 int planeId = (i * 10) + j + 1;
                 Plane plane = new Plane(planeId, x, y, newAirport);
-                
+                newAirport.receivePlane(plane);
+
                 // adding to grid
                 GridAreaIcon planeIcon = new GridAreaIcon(
                     x, y, random.nextDouble() * 360, 1.0,
-                    App.class.getClassLoader().getResourceAsStream("plane.png"),
+                    App.class.getClassLoader().getResourceAsStream("pikachu.png"),
                     "Plane " + planeId);
                 area.getIcons().add(planeIcon);
 
-                // starting thread for each
-                // TO DO: thread pool of planes
+                // TO DO: thread pool of planes <-- wrong, probably want thread pool of flight requests or services instead
                 new Thread(plane).start();
             }
-
+            // using airport manager to start a flight request proccess for each created airport
+            airportManager.startFlightRequests();
         }
-
-        // initializing a flight request process for each airport 
-        for (int i = 0; i < 10; i++)
-        {
-            int airportId = i + 1;
-            nAirports = airportManager.getAirportCount();
-            FlightRequest flightRequest = new FlightRequest(nAirports, airportId, airportManager);
-            System.out.println("Executing command with arguments: " + nAirports + ", " + airportId);
-            new Thread(flightRequest::run).start();
-        }
+    
 
         // Set up other key parts of the user interface. You'll also want to adjust this.
 
