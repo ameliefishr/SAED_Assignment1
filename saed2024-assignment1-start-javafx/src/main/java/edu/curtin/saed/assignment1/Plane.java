@@ -1,20 +1,34 @@
 package edu.curtin.saed.assignment1;
 
-public class Plane implements Runnable
+import java.util.Random;
+
+import javafx.application.Platform;
+
+public class Plane
 {
     private int id;
     private int xPos;
     private int yPos;
     private Airport currentAirport;
     private Airport destinationAirport;
+    private GridArea area;
+    private GridAreaIcon planeIcon;
 
-    public Plane(int id, int xPos, int yPos, Airport currentAirport)
+    public Plane(int id, int xPos, int yPos, Airport currentAirport, GridArea area)
     {
         this.id = id;
         this.xPos = xPos;
         this.yPos = yPos;
         this.currentAirport = currentAirport;
         this.destinationAirport = null;
+        this.area = area;
+
+        Random random = new Random();
+        this.planeIcon = new GridAreaIcon(
+            this.xPos, this.yPos, random.nextDouble() * 360, 1.0,
+            App.class.getClassLoader().getResourceAsStream("pikachu.png"),
+            "Plane " + this.id);
+        area.getIcons().add(planeIcon);
     }
 
     // setters & getters
@@ -70,17 +84,55 @@ public class Plane implements Runnable
         return this.currentAirport;
     }
 
-    public void flyToDestination(Airport destination)
+     // movement logic was inspired from here: https://gamedev.stackexchange.com/questions/68790/how-can-i-move-an-object-towards-another-along-a-straight-line
+    public void flyToDestination()
     {
-        // TO DO: add flight logic here;
-        System.out.println("Plane ID: " + id + " flying to Airport ID: " + destination.getId());
-    }
+        //checking if a destination exists and that the plane isn't already there
+        if(destinationAirport != null)
+        {
+            if(xPos != destinationAirport.getX() && yPos != destinationAirport.getY())
+            {
 
-    // need to override runnable's run()
-    @Override
-    public void run()
-    {
+                // calculate direction movements based on current position
+                int movementX = Integer.compare(destinationAirport.getX(), xPos);
+                int movementY = Integer.compare(destinationAirport.getY(), yPos); 
 
-        
+                // Move towards the destination in a loop
+                while (xPos != destinationAirport.getX() || yPos != destinationAirport.getY())
+                {
+                    if (xPos != destinationAirport.getX())
+                    {
+                        xPos += movementX;
+                    }
+
+                    if (yPos != destinationAirport.getY())
+                    {
+                        yPos += movementY;
+                    }
+
+                    System.out.println("Plane " + id + " moving to (" + xPos + ", " + yPos + ") towards destination (" + destinationAirport.getX() + ", " + destinationAirport.getY() + ")");
+
+                    // updating UI
+                    Platform.runLater(() -> {
+                        planeIcon.setPosition(xPos, yPos); 
+                        area.requestLayout(); 
+                    });
+                        try
+                        {
+                            Thread.sleep(100); 
+                        }
+                        catch (InterruptedException e)
+                        {
+                            Thread.currentThread().interrupt();
+                            break;
+                        }
+                    }
+
+                    // once plane has reached new destination
+                    setCurrentAirport(destinationAirport);
+                    destinationAirport.receivePlane(this);
+                    System.out.println("Plane " + id + " has reached the destination at (" + destinationAirport.getX() + ", " + destinationAirport.getY() + ")");
+            }
+        }        
     }
 }

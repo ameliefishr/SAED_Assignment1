@@ -69,22 +69,15 @@ public class App extends Application
             for (int j = 0; j < 10; j++)
             {
                 int planeId = (i * 10) + j + 1;
-                Plane plane = new Plane(planeId, x, y, newAirport);
+                Plane plane = new Plane(planeId, x, y, newAirport, area);
                 newAirport.receivePlane(plane);
 
-                // adding to grid
-                GridAreaIcon planeIcon = new GridAreaIcon(
-                    x, y, random.nextDouble() * 360, 1.0,
-                    App.class.getClassLoader().getResourceAsStream("pikachu.png"),
-                    "Plane " + planeId);
-                area.getIcons().add(planeIcon);
-
                 // TO DO: thread pool of planes <-- wrong, probably want thread pool of flight requests or services instead
-                new Thread(plane).start();
+                //new Thread(plane).start();
             }
             // using airport manager to start a flight request proccess for each created airport
-            airportManager.startFlightRequests();
         }
+        airportManager.startFlightRequests();
     
 
         // Set up other key parts of the user interface. You'll also want to adjust this.
@@ -135,10 +128,9 @@ public class App extends Application
     }
 
     // TO DO: logic for moving plane accross grid towards aiport
-    public void flyToDestination(Plane plane, Airport destinationAirport)
+    public void updatePlane(Plane plane)
     {
-        int destinationX = destinationAirport.getX();
-        int destinationY = destinationAirport.getY();
+
 
 
     }

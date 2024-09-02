@@ -3,7 +3,7 @@ package edu.curtin.saed.assignment1;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class Airport 
+public class Airport implements Runnable
 {
     // initializing variables
     private int id;
@@ -11,6 +11,7 @@ public class Airport
     private int yPos;
     private BlockingQueue<Plane> serviceQueue; // queue for servicing
     private BlockingQueue<Plane> availableQueue; // queue for available planes
+    private BlockingQueue<FlightRequest> flightRequestQueue; // queue for fight requests
 
     // constructor
     public Airport(int id, int xPos, int yPos)
@@ -20,6 +21,9 @@ public class Airport
         this.yPos = yPos;
         this.serviceQueue = new LinkedBlockingQueue<>(); // linked blocking queue for producer/consumer scenario
         this.availableQueue = new LinkedBlockingQueue<>();
+        this.flightRequestQueue = new LinkedBlockingQueue<>();
+        Thread airportThread = new Thread(this);
+        airportThread.start();
     }
 
     // getters & settters
@@ -48,6 +52,11 @@ public class Airport
         return availableQueue;
     }
 
+    public BlockingQueue<FlightRequest> getFlightRequests()
+    {
+        return flightRequestQueue;
+    }
+
     // so far I have not found a need for airport setters, may add later
 
     // add planes to queue to get serviced
@@ -62,6 +71,20 @@ public class Airport
         {
             Thread.currentThread().interrupt();
             System.out.println("Failed to add Plane ID: " + plane.getId() + " to service queue at airport ID: " + this.id);
+        }
+    }
+
+    public void addFlightRequestToQueue(FlightRequest flightRequest)
+    {
+        //TO DO: code to add flight request to queue
+        try
+        {
+            flightRequestQueue.put(flightRequest);
+
+        }
+        catch(InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -89,7 +112,7 @@ public class Airport
         // if this is not the beginning of the sim
         if(plane.getDestinationAirport() != null)
             {
-                plane.setDestinationAirport(null);
+                plane.setDestinationAirport(null); // plane no longer has a destination
                 addPlaneToServiceQueue(plane);
                 servicePlane();
             }
@@ -107,5 +130,37 @@ public class Airport
             }
         }
 
+    }
+
+    public void handleFlightRequests()
+    {
+        while(!Thread.currentThread().isInterrupted())
+        {
+            try
+            {
+                FlightRequest flightRequest = flightRequestQueue.take(); // take a reques from the queue
+                Plane availablePlane = availableQueue.take(); // take an available plane from the queue
+                
+                availablePlane.setDestinationAirport(flightRequest.getDestinationAirport());
+                availablePlane.flyToDestination();
+            }
+            catch(InterruptedException e)
+            {
+                Thread.currentThread().interrupt();
+                System.out.println("Flight request processing interrupted at airport ID: " + this.id);
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void run() 
+    {
+        handleFlightRequests();
+    }
+
+    public void shutdown()
+    {
+        Thread.currentThread().interrupt(); // stop thread
     }
 }
