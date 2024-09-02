@@ -29,6 +29,7 @@ public class Plane
             App.class.getClassLoader().getResourceAsStream("pikachu.png"),
             "Plane " + this.id);
         area.getIcons().add(planeIcon);
+        planeIcon.setShown(false);
     }
 
     // setters & getters
@@ -87,12 +88,16 @@ public class Plane
      // movement logic was inspired from here: https://gamedev.stackexchange.com/questions/68790/how-can-i-move-an-object-towards-another-along-a-straight-line
     public void flyToDestination()
     {
+        Platform.runLater(() -> {
+            planeIcon.setShown(true); 
+            area.requestLayout(); 
+        });
+
         //checking if a destination exists and that the plane isn't already there
         if(destinationAirport != null)
         {
             if(xPos != destinationAirport.getX() && yPos != destinationAirport.getY())
             {
-
                 // calculate direction movements based on current position
                 int movementX = Integer.compare(destinationAirport.getX(), xPos);
                 int movementY = Integer.compare(destinationAirport.getY(), yPos); 
@@ -129,10 +134,21 @@ public class Plane
                     }
 
                     // once plane has reached new destination
+                    System.out.println("Plane " + id + " has reached the destination at (" + destinationAirport.getX() + ", " + destinationAirport.getY() + ")");
                     setCurrentAirport(destinationAirport);
                     destinationAirport.receivePlane(this);
-                    System.out.println("Plane " + id + " has reached the destination at (" + destinationAirport.getX() + ", " + destinationAirport.getY() + ")");
             }
-        }        
+            Platform.runLater(() -> {
+                planeIcon.setShown(false); 
+                area.requestLayout(); 
+            });
+        }
+        else
+        {
+            Platform.runLater(() -> {
+                planeIcon.setShown(false); 
+                area.requestLayout(); 
+            });
+        }       
     }
 }

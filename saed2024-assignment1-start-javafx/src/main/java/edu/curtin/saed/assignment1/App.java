@@ -55,7 +55,7 @@ public class App extends Application
 
             // creating airports (default 10)
             // airport creation also handles service queue & available queue set-up
-            Airport newAirport = new Airport(airportId, x, y);
+            Airport newAirport = new Airport(airportId, x, y, airportManager);
             airportManager.addAirport(newAirport);            
 
             // adding airports to grid 
@@ -68,7 +68,7 @@ public class App extends Application
             // creating planes for each airport (default 10 per airport)
             for (int j = 0; j < 10; j++)
             {
-                int planeId = (i * 10) + j + 1;
+                int planeId = j;
                 Plane plane = new Plane(planeId, x, y, newAirport, area);
                 newAirport.receivePlane(plane);
 

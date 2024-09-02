@@ -12,9 +12,10 @@ public class Airport implements Runnable
     private BlockingQueue<Plane> serviceQueue; // queue for servicing
     private BlockingQueue<Plane> availableQueue; // queue for available planes
     private BlockingQueue<FlightRequest> flightRequestQueue; // queue for fight requests
+    private AirportManager airportManager;
 
     // constructor
-    public Airport(int id, int xPos, int yPos)
+    public Airport(int id, int xPos, int yPos, AirportManager airportManager)
     {
         this.id = id;
         this.xPos = xPos;
@@ -22,6 +23,7 @@ public class Airport implements Runnable
         this.serviceQueue = new LinkedBlockingQueue<>(); // linked blocking queue for producer/consumer scenario
         this.availableQueue = new LinkedBlockingQueue<>();
         this.flightRequestQueue = new LinkedBlockingQueue<>();
+        this.airportManager = airportManager;
         Thread airportThread = new Thread(this);
         airportThread.start();
     }
@@ -141,8 +143,16 @@ public class Airport implements Runnable
                 FlightRequest flightRequest = flightRequestQueue.take(); // take a reques from the queue
                 Plane availablePlane = availableQueue.take(); // take an available plane from the queue
                 
-                availablePlane.setDestinationAirport(flightRequest.getDestinationAirport());
-                availablePlane.flyToDestination();
+                Airport destination = flightRequest.getDestinationAirport();
+                if (destination == null) 
+                {
+                    System.out.println("Error: destination was null");
+                } 
+                else
+                {
+                    availablePlane.setDestinationAirport(destination);
+                    availablePlane.flyToDestination();
+                }
             }
             catch(InterruptedException e)
             {
