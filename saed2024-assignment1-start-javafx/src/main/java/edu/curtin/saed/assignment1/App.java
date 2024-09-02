@@ -28,6 +28,7 @@ public class App extends Application
 {
     private static final int gridWidth = 10;
     private static final int gridHeight = 10;
+    private int startCount = 0;
     private AirportManager airportManager = new AirportManager();
 
     public static void main(String[] args)
@@ -77,7 +78,6 @@ public class App extends Application
             }
             // using airport manager to start a flight request proccess for each created airport
         }
-        airportManager.startFlightRequests();
     
 
         // Set up other key parts of the user interface. You'll also want to adjust this.
@@ -87,7 +87,12 @@ public class App extends Application
 
         startBtn.setOnAction((event) ->
         {
+            if(startCount == 0)
+            {
+                airportManager.startFlightRequests(); // ensuring flight request process is only started once
+            }
             System.out.println("Start button pressed");
+            startCount++;
         });
         endBtn.setOnAction((event) ->
         {
@@ -120,18 +125,5 @@ public class App extends Application
         var scene = new Scene(contentPane, 1200, 1000);
         stage.setScene(scene);
         stage.show();
-    }
-
-    public void initializeSim()
-    {
-        
-    }
-
-    // TO DO: logic for moving plane accross grid towards aiport
-    public void updatePlane(Plane plane)
-    {
-
-
-
     }
 }
