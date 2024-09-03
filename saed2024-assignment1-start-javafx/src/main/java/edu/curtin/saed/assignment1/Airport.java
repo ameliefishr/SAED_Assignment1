@@ -9,10 +9,10 @@ import java.util.concurrent.TimeUnit;
 public class Airport implements Runnable
 {
     // initializing variables
-    private boolean running;
     private int id;
     private int xPos;
     private int yPos;
+    private boolean running;
     private BlockingQueue<Plane> availableQueue; // queue for available planes
     private BlockingQueue<FlightRequest> flightRequestQueue; // queue for fight requests
     private ExecutorService servicePool;
@@ -25,8 +25,8 @@ public class Airport implements Runnable
         this.yPos = yPos;
         this.availableQueue = new LinkedBlockingQueue<>(); // linked blocking queue for producer/consumer scenario
         this.flightRequestQueue = new LinkedBlockingQueue<>();
-        this.running = true;
         this.servicePool = Executors.newFixedThreadPool(10);
+        this.running = true;
         Thread airportThread = new Thread(this);
         airportThread.start();
     }
@@ -77,9 +77,8 @@ public class Airport implements Runnable
     // code for service simulation
     public void servicePlane(Plane newPlane)
     {
-        if(running)
+        if(!Thread.currentThread().isInterrupted())
         {
-
             Service service = new Service(this.id, newPlane, availableQueue);
             servicePool.submit(service);
             
@@ -88,13 +87,12 @@ public class Airport implements Runnable
 
     public void receivePlane(Plane newPlane)
     {
-        if(running)
+        if(!Thread.currentThread().isInterrupted())
         {
             // if this is not the beginning of the sim
             if(newPlane.getDestinationAirport() != null)
                 {
-                    newPlane.setDestinationAirport(null); // plane no longer has a destination
-                    //addPlaneToServiceQueue(newPlane); // add plane to destination airport's service queue
+                    newPlane.setDestinationAirport(null); // plane no longer has a destination until it receives a new one
                     servicePlane(newPlane); // run service process on plane
                 }
 
@@ -115,28 +113,28 @@ public class Airport implements Runnable
 
     public void handleFlightRequests()
     {
-        while(running & !Thread.currentThread().isInterrupted())
+        while(!Thread.currentThread().isInterrupted())
         {
             try
             {
-                FlightRequest flightRequest = flightRequestQueue.take(); // take a reques from the queue
-                Plane availablePlane = availableQueue.take(); // take an available plane from the queue
+                FlightRequest flightRequest = flightRequestQueue.take(); // take a request from the queue (CONSUME)
+                Plane availablePlane = availableQueue.take(); // take an available plane from the queue (CONSUME)
                 
-                Airport destination = flightRequest.getDestinationAirport();
-                if (destination == null) 
+                Airport destination = flightRequest.getDestinationAirport(); // get destination from flight request
+                if (destination == null) // null checks
                 {
                     System.out.println("Error: destination was null");
                 } 
                 else
                 {
-                    availablePlane.setDestinationAirport(destination);
-                    availablePlane.flyToDestination();
+                    availablePlane.setDestinationAirport(destination); // setting new destination from flight request
+                    availablePlane.flyToDestination(); // begin flying to destination
                 }
             }
             catch(InterruptedException e)
             {
                 Thread.currentThread().interrupt();
-                break; // exit looop
+                break; // exit looop if thread  is interrupted
             }
         }
     }
@@ -149,7 +147,7 @@ public class Airport implements Runnable
 
     public void shutdown()
     {
-        running = false;
+        running = false; // make sure no planes try to fly to airport after it's shutdown
         servicePool.shutdown();// shut down service thread pool 
         Thread.currentThread().interrupt(); // stop airport thread
         System.out.println("Shutting down airport ID: " + this.id);
@@ -157,7 +155,7 @@ public class Airport implements Runnable
         {
             if (!servicePool.awaitTermination(5, TimeUnit.SECONDS))
             {
-                servicePool.shutdownNow(); // force shutdown if necessary
+                servicePool.shutdownNow(); // force shutdown if regular shutdown takes too long
             }
         }
         catch (InterruptedException e)
