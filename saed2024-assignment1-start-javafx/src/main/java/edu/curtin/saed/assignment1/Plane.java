@@ -94,13 +94,19 @@ public class Plane
         return this.currentAirport;
     }
 
+    // updates plane's visibility
+    public void setVisibility(boolean shown)
+    {
+        Platform.runLater(() -> {
+            planeIcon.setShown(shown); 
+            area.requestLayout(); 
+        });
+    }
+
      // movement logic was inspired from here: https://gamedev.stackexchange.com/questions/68790/how-can-i-move-an-object-towards-another-along-a-straight-line
     public void flyToDestination()
     {
-        Platform.runLater(() -> {
-            planeIcon.setShown(true); 
-            area.requestLayout(); 
-        });
+        setVisibility(true); // make plane visible
 
         //checking if a destination exists and that the plane isn't already there
         if(destinationAirport != null && destinationAirport.isRunning())
@@ -148,17 +154,11 @@ public class Plane
                         destinationAirport.receivePlane(this);
                     }
             }
-            Platform.runLater(() -> {
-                planeIcon.setShown(false); 
-                area.requestLayout(); 
-            });
+            setVisibility(false); //once landed, make plane invisible
         }
         else
         {
-            Platform.runLater(() -> {
-                planeIcon.setShown(false); 
-                area.requestLayout(); 
-            });
+            setVisibility(false); // if plane cannot fly to airport, hide plane
         }       
     }
 }

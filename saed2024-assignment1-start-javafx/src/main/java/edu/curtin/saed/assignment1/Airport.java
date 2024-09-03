@@ -13,7 +13,6 @@ public class Airport implements Runnable
     private int id;
     private int xPos;
     private int yPos;
-    private BlockingQueue<Plane> serviceQueue; // queue for servicing
     private BlockingQueue<Plane> availableQueue; // queue for available planes
     private BlockingQueue<FlightRequest> flightRequestQueue; // queue for fight requests
     private ExecutorService servicePool;
@@ -24,8 +23,7 @@ public class Airport implements Runnable
         this.id = id;
         this.xPos = xPos;
         this.yPos = yPos;
-        this.serviceQueue = new LinkedBlockingQueue<>(); // linked blocking queue for producer/consumer scenario
-        this.availableQueue = new LinkedBlockingQueue<>();
+        this.availableQueue = new LinkedBlockingQueue<>(); // linked blocking queue for producer/consumer scenario
         this.flightRequestQueue = new LinkedBlockingQueue<>();
         this.running = true;
         this.servicePool = Executors.newFixedThreadPool(10);
@@ -33,7 +31,7 @@ public class Airport implements Runnable
         airportThread.start();
     }
 
-    // getters & settters
+    // setters & getters (a few of these are not used but still included for good coding standard)
     public int getId()
     {
         return id;
@@ -47,11 +45,6 @@ public class Airport implements Runnable
     public int getY()
     {
         return yPos;
-    }
-
-    public BlockingQueue<Plane> getServiceQueue()
-    {
-        return serviceQueue;
     }
 
     public BlockingQueue<Plane> getAvailablePlanesQueue()
@@ -71,62 +64,38 @@ public class Airport implements Runnable
 
     // so far I have not found a need for airport setters, may add later
 
-    // add planes to queue to get serviced
-    public void addPlaneToServiceQueue(Plane plane)
+    public void putNextFlightRequest(FlightRequest flightRequest) throws InterruptedException
     {
-        try
-        {
-            serviceQueue.put(plane);
-            System.out.println("Plane ID: " + plane.getId() + " added to service queue at airport ID: " + this.id);
-        }
-        catch (InterruptedException e)
-        {
-            Thread.currentThread().interrupt();
-        }
+        flightRequestQueue.put(flightRequest);
     }
 
-    public void addFlightRequestToQueue(FlightRequest flightRequest)
+    public void putNextAvailablePlane(Plane availablePlane) throws InterruptedException
     {
-        try
-        {
-            flightRequestQueue.put(flightRequest);
-
-        }
-        catch(InterruptedException e)
-        {
-            Thread.currentThread().interrupt();
-        }
+        availableQueue.put(availablePlane);
     }
 
     // code for service simulation
-    public void servicePlane()
+    public void servicePlane(Plane newPlane)
     {
         if(running)
         {
-            try
-            {
-                Plane plane = serviceQueue.take(); // take next plane from service queue
-                Service service = new Service(this.id, plane, availableQueue);
-                servicePool.submit(service);
-                // TO DO: make service updates print to UI
-            }
-            catch (InterruptedException e)
-            {
-                Thread.currentThread().interrupt();a
-            }
+
+            Service service = new Service(this.id, newPlane, availableQueue);
+            servicePool.submit(service);
+            
         }
     }
 
-    public void receivePlane(Plane plane)
+    public void receivePlane(Plane newPlane)
     {
         if(running)
         {
             // if this is not the beginning of the sim
-            if(plane.getDestinationAirport() != null)
+            if(newPlane.getDestinationAirport() != null)
                 {
-                    plane.setDestinationAirport(null); // plane no longer has a destination
-                    addPlaneToServiceQueue(plane); // add plane to destination airport's service queue
-                    servicePlane(); // run service process on plane
+                    newPlane.setDestinationAirport(null); // plane no longer has a destination
+                    //addPlaneToServiceQueue(newPlane); // add plane to destination airport's service queue
+                    servicePlane(newPlane); // run service process on plane
                 }
 
             // if it is beginning of sim (planes dont need to be serviced)
@@ -134,7 +103,7 @@ public class Airport implements Runnable
             {
                 try
                 {
-                    availableQueue.put(plane); // put plane straight into available planes queue
+                    availableQueue.put(newPlane); // put plane straight into available planes queue
                 }
                 catch (InterruptedException e)
                 {

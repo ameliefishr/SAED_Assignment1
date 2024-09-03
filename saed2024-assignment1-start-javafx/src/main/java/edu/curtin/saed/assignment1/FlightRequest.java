@@ -60,8 +60,14 @@ public class FlightRequest implements Runnable
                             if(destinationAirport != null && destinationAirport.isRunning())
                             {
                                 Airport currentAirport = airportManager.getAirportById(originAirport);
-                                currentAirport.addFlightRequestToQueue(this);
-                                // TO DO: add a way to assign FQ to airport's planes
+                                try
+                                {
+                                    currentAirport.putNextFlightRequest(this);
+                                }
+                                catch (InterruptedException e)
+                                {
+                                    
+                                }
                                 System.out.println("Processing flight from airport ID " + originAirport + " to airport ID " + destinationAirportID);
                             }
                         }
@@ -84,7 +90,7 @@ public class FlightRequest implements Runnable
             }
             catch (IOException e)
             {
-                System.err.println("Error while running flight requests for origin airport ID: " + originAirport);
+                System.err.println("IOException while proccessing file request");
             }
         }
     }
