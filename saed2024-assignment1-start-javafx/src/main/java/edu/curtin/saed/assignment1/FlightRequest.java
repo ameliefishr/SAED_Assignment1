@@ -30,7 +30,7 @@ public class FlightRequest implements Runnable
     @Override
     public void run()
     {
-        Process proc; // for running FQ
+        Process proc; // for running flight request proccess
         if (nAirports >= 2)
         {
             try
@@ -66,7 +66,7 @@ public class FlightRequest implements Runnable
                                 }
                                 catch (InterruptedException e)
                                 {
-                                    
+                                    Thread.currentThread().interrupt();
                                 }
                                 System.out.println("Processing flight from airport ID " + originAirport + " to airport ID " + destinationAirportID);
                             }
@@ -81,7 +81,7 @@ public class FlightRequest implements Runnable
                         {
                             if (proc != null)
                             {
-                                proc.destroy(); 
+                                proc.destroy();  // make sure to destroy proccess when sim is complete
                             }
                         }
                     }
