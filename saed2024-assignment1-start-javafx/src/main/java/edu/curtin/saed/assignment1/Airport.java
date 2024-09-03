@@ -82,7 +82,6 @@ public class Airport implements Runnable
         catch (InterruptedException e)
         {
             Thread.currentThread().interrupt();
-            System.out.println("Failed to add Plane ID: " + plane.getId() + " to service queue at airport ID: " + this.id);
         }
     }
 
@@ -114,7 +113,6 @@ public class Airport implements Runnable
             catch (InterruptedException e)
             {
                 Thread.currentThread().interrupt();
-                System.out.println("No planes available for servicing at airport ID: " + this.id);
             }
         }
     }
