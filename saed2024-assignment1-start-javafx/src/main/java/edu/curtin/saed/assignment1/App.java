@@ -26,8 +26,8 @@ import javafx.stage.Stage;
 import java.util.Random;
 public class App extends Application
 {
-    private static final int gridWidth = 10;
-    private static final int gridHeight = 10;
+    private static final int GRID_WIDTH = 10;
+    private static final int GRID_HEIGHT = 10;
     private int startCount = 0;
     private AirportManager airportManager = new AirportManager();
 
@@ -42,21 +42,21 @@ public class App extends Application
         // Set up the main "top-down" display area. This is an example only, and you should
         // change this to set it up as you require.
 
-        GridArea area = new GridArea(gridWidth, gridHeight);
+        GridArea area = new GridArea(GRID_WIDTH, GRID_HEIGHT);
         area.setGridLines(false); // If desired
         area.setStyle("-fx-background-color: #73c8a1;");
 
         Random random = new Random();
         for (int i = 0; i < 10; i++)
         {
-            int x = random.nextInt(gridWidth);
-            int y = random.nextInt(gridHeight);
+            int x = random.nextInt(GRID_WIDTH);
+            int y = random.nextInt(GRID_HEIGHT);
             String airportName = "Airport " + (i + 1);
             int airportId = i + 1;
 
             // creating airports (default 10)
             // airport creation also handles service queue & available queue set-up
-            Airport newAirport = new Airport(airportId, x, y, airportManager);
+            Airport newAirport = new Airport(airportId, x, y);
             airportManager.addAirport(newAirport);            
 
             // adding airports to grid 
@@ -72,11 +72,7 @@ public class App extends Application
                 int planeId = j;
                 Plane plane = new Plane(planeId, x, y, newAirport, area);
                 newAirport.receivePlane(plane);
-
-                // TO DO: thread pool of planes <-- wrong, probably want thread pool of flight requests or services instead
-                //new Thread(plane).start();
             }
-            // using airport manager to start a flight request proccess for each created airport
         }
     
 
@@ -87,23 +83,25 @@ public class App extends Application
 
         startBtn.setOnAction((event) ->
         {
-            if(startCount == 0)
+            if(startCount == 0) // ensuring flight request process is only started once
             {
-                airportManager.startFlightRequests(); // ensuring flight request process is only started once
+                airportManager.startFlightRequests(); // using airport manager to start a flight request proccess for each created airport
             }
             System.out.println("Start button pressed");
             startCount++;
         });
         endBtn.setOnAction((event) ->
         {
+            airportManager.shutdown();
             System.out.println("End button pressed");
         });
         stage.setOnCloseRequest((event) ->
         {
+            airportManager.shutdown();
             System.out.println("Close button pressed");
         });
-        var statusText = new Label("Label Text");
-        var textArea = new TextArea();
+        var statusText = new Label("Label Text"); // TO DO: update status here
+        var textArea = new TextArea(); // TO DO: put simulation updates here
         textArea.appendText("Sidebar\n");
         textArea.appendText("Text\n");
 

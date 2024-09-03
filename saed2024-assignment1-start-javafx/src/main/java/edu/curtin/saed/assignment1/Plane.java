@@ -32,7 +32,7 @@ public class Plane
         planeIcon.setShown(false);
     }
 
-    // setters & getters
+    // setters & getters (a few of these are not used but still included for good coding standard)
     
     // will have to receive from flight request
     public void setDestinationAirport(Airport destination)
@@ -40,46 +40,55 @@ public class Plane
         this.destinationAirport = destination;
     }
 
+    // sets plane's current airport
     public void setCurrentAirport(Airport currentAirport)
     {
         this.currentAirport = currentAirport;
     }
 
+    // sets plane's id
     public void setId(int id)
     {
         this.id = id;
     }
 
+    // sets plane's x coordinate
     public void setX(int x)
     {
         this.xPos = x;
     }
 
+    // sets plane's y coordinate
     public void setY(int y)
     {
         this.yPos = y;
     }
 
+    // retrieves plane's id
     public int getId()
     {
         return id;
     }
 
+    // retrieves plane's x coordinate
     public int getX()
     {
         return xPos;
     }
 
+    // retrieves plane's y coordinate
     public int getY()
     {
         return yPos;
     }
 
+    // retrieves plane's destination airport
     public Airport getDestinationAirport()
     {
         return this.destinationAirport;
     }
 
+    // retrieves plane's current airport
     public Airport getCurrentAirport()
     {
         return this.currentAirport;
@@ -94,7 +103,7 @@ public class Plane
         });
 
         //checking if a destination exists and that the plane isn't already there
-        if(destinationAirport != null)
+        if(destinationAirport != null && destinationAirport.isRunning())
         {
             if(xPos != destinationAirport.getX() && yPos != destinationAirport.getY())
             {
@@ -102,8 +111,8 @@ public class Plane
                 int movementX = Integer.compare(destinationAirport.getX(), xPos);
                 int movementY = Integer.compare(destinationAirport.getY(), yPos); 
 
-                // Move towards the destination in a loop
-                while (xPos != destinationAirport.getX() || yPos != destinationAirport.getY())
+                // move towards the destination in a loop until it is reached
+                while (xPos != destinationAirport.getX() || yPos != destinationAirport.getY() && destinationAirport.isRunning())
                 {
                     if (xPos != destinationAirport.getX())
                     {
@@ -114,8 +123,6 @@ public class Plane
                     {
                         yPos += movementY;
                     }
-
-                    System.out.println("Plane " + id + " moving to (" + xPos + ", " + yPos + ") towards destination (" + destinationAirport.getX() + ", " + destinationAirport.getY() + ")");
 
                     // updating UI
                     Platform.runLater(() -> {
@@ -129,14 +136,17 @@ public class Plane
                         catch (InterruptedException e)
                         {
                             Thread.currentThread().interrupt();
-                            break;
+                            break; // exit loop if thread is interrupted
                         }
                     }
 
                     // once plane has reached new destination
-                    System.out.println("Plane " + id + " has reached the destination at (" + destinationAirport.getX() + ", " + destinationAirport.getY() + ")");
-                    setCurrentAirport(destinationAirport);
-                    destinationAirport.receivePlane(this);
+                    if(destinationAirport.isRunning())
+                    {
+                        System.out.println("Plane " + id + " has reached the destination at (" + destinationAirport.getX() + ", " + destinationAirport.getY() + ")");
+                        setCurrentAirport(destinationAirport);
+                        destinationAirport.receivePlane(this);
+                    }
             }
             Platform.runLater(() -> {
                 planeIcon.setShown(false); 

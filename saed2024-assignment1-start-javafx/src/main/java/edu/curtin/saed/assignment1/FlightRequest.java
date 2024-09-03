@@ -7,6 +7,7 @@ public class FlightRequest implements Runnable
     private int originAirport; // command input
     private AirportManager airportManager; // airport manager instance
     private Airport destinationAirport; // airport id of destination
+    private volatile boolean running = true;
 
     // constructor
     public FlightRequest(int numberOfAirports, int originAirportID, AirportManager airportManager)
@@ -21,7 +22,10 @@ public class FlightRequest implements Runnable
         return destinationAirport;
     }
 
-
+    public void stop() 
+    {
+        running = false; // stop the run loop
+    }
 
     @Override
     public void run()
@@ -40,23 +44,39 @@ public class FlightRequest implements Runnable
                 try(BufferedReader br = proc.inputReader())
                 {
                     String line;
-                    while ((line = br.readLine()) != null)
+                    while (running && (line = br.readLine()) != null)
                     {
+                        if (Thread.currentThread().isInterrupted())
+                        {
+                            break; // exit loop if thread is interrupted
+                        }
+
                         try
                         {
                             int destinationAirportID = Integer.parseInt(line.trim());
                             System.out.println("Received flight request to airport ID: " + destinationAirportID);
                             this.destinationAirport = airportManager.getAirportById(destinationAirportID);
-                            Airport currentAirport = airportManager.getAirportById(originAirport);
-                            currentAirport.addFlightRequestToQueue(this);
-                            // TO DO: add a way to assign FQ to airport's planes
-                            System.out.println("Processing flight from airport ID " + originAirport + " to airport ID " + destinationAirportID);
+
+                            if(destinationAirport != null && destinationAirport.isRunning())
+                            {
+                                Airport currentAirport = airportManager.getAirportById(originAirport);
+                                currentAirport.addFlightRequestToQueue(this);
+                                // TO DO: add a way to assign FQ to airport's planes
+                                System.out.println("Processing flight from airport ID " + originAirport + " to airport ID " + destinationAirportID);
+                            }
                         }
-                        // I had to add this in because I kept getting jvm memory errors (i have low space) that would print from the bat file and throw this exception
-                        // after I restarted my computer they went away but I left this in just incase
+                        // I had to add this in because I kept getting jvm memory errors that would print from the bat file and throw this exception
+                        // after I fixed my threading they went away but I left this in just incase
                         catch(NumberFormatException e) 
                         {
                             System.out.println("Flight Request output not an integer: " + e.getMessage());
+                        }
+                        finally
+                        {
+                            if (proc != null)
+                            {
+                                proc.destroy(); 
+                            }
                         }
                     }
                 }

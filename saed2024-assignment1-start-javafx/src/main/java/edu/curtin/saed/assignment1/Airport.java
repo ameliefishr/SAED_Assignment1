@@ -1,21 +1,25 @@
 package edu.curtin.saed.assignment1;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class Airport implements Runnable
 {
     // initializing variables
+    private boolean running;
     private int id;
     private int xPos;
     private int yPos;
     private BlockingQueue<Plane> serviceQueue; // queue for servicing
     private BlockingQueue<Plane> availableQueue; // queue for available planes
     private BlockingQueue<FlightRequest> flightRequestQueue; // queue for fight requests
-    private AirportManager airportManager;
+    private ExecutorService servicePool;
 
     // constructor
-    public Airport(int id, int xPos, int yPos, AirportManager airportManager)
+    public Airport(int id, int xPos, int yPos)
     {
         this.id = id;
         this.xPos = xPos;
@@ -23,7 +27,8 @@ public class Airport implements Runnable
         this.serviceQueue = new LinkedBlockingQueue<>(); // linked blocking queue for producer/consumer scenario
         this.availableQueue = new LinkedBlockingQueue<>();
         this.flightRequestQueue = new LinkedBlockingQueue<>();
-        this.airportManager = airportManager;
+        this.running = true;
+        this.servicePool = Executors.newFixedThreadPool(10);
         Thread airportThread = new Thread(this);
         airportThread.start();
     }
@@ -59,6 +64,11 @@ public class Airport implements Runnable
         return flightRequestQueue;
     }
 
+    public boolean isRunning()
+    {
+        return running;
+    }
+
     // so far I have not found a need for airport setters, may add later
 
     // add planes to queue to get serviced
@@ -78,7 +88,6 @@ public class Airport implements Runnable
 
     public void addFlightRequestToQueue(FlightRequest flightRequest)
     {
-        //TO DO: code to add flight request to queue
         try
         {
             flightRequestQueue.put(flightRequest);
@@ -93,50 +102,53 @@ public class Airport implements Runnable
     // code for service simulation
     public void servicePlane()
     {
-        
-        try
+        if(running)
         {
-            Plane plane = serviceQueue.take(); // take next plane from service queue
-            Service service = new Service(this.id, plane, availableQueue);
-            Thread serviceThread = new Thread(service);
-            serviceThread.start();
-            // TO DO: make service updates print to UI
-        }
-        catch (InterruptedException e)
-        {
-            Thread.currentThread().interrupt();
-            System.out.println("No planes available for servicing at airport ID: " + this.id);
+            try
+            {
+                Plane plane = serviceQueue.take(); // take next plane from service queue
+                Service service = new Service(this.id, plane, availableQueue);
+                servicePool.submit(service);
+                // TO DO: make service updates print to UI
+            }
+            catch (InterruptedException e)
+            {
+                Thread.currentThread().interrupt();
+                System.out.println("No planes available for servicing at airport ID: " + this.id);
+            }
         }
     }
 
     public void receivePlane(Plane plane)
     {
-        // if this is not the beginning of the sim
-        if(plane.getDestinationAirport() != null)
-            {
-                plane.setDestinationAirport(null); // plane no longer has a destination
-                addPlaneToServiceQueue(plane);
-                servicePlane();
-            }
-
-        // if it is beginning of sim (planes dont need to be serviced)
-        else
+        if(running)
         {
-            try
+            // if this is not the beginning of the sim
+            if(plane.getDestinationAirport() != null)
+                {
+                    plane.setDestinationAirport(null); // plane no longer has a destination
+                    addPlaneToServiceQueue(plane); // add plane to destination airport's service queue
+                    servicePlane(); // run service process on plane
+                }
+
+            // if it is beginning of sim (planes dont need to be serviced)
+            else
             {
-                availableQueue.put(plane);
-            }
-            catch (InterruptedException e)
-            {
-                Thread.currentThread().interrupt();
+                try
+                {
+                    availableQueue.put(plane); // put plane straight into available planes queue
+                }
+                catch (InterruptedException e)
+                {
+                    Thread.currentThread().interrupt();
+                }
             }
         }
-
     }
 
     public void handleFlightRequests()
     {
-        while(!Thread.currentThread().isInterrupted())
+        while(running & !Thread.currentThread().isInterrupted())
         {
             try
             {
@@ -157,8 +169,7 @@ public class Airport implements Runnable
             catch(InterruptedException e)
             {
                 Thread.currentThread().interrupt();
-                System.out.println("Flight request processing interrupted at airport ID: " + this.id);
-                break;
+                break; // exit looop
             }
         }
     }
@@ -171,6 +182,20 @@ public class Airport implements Runnable
 
     public void shutdown()
     {
-        Thread.currentThread().interrupt(); // stop thread
+        running = false;
+        servicePool.shutdown();// shut down service thread pool 
+        Thread.currentThread().interrupt(); // stop airport thread
+        System.out.println("Shutting down airport ID: " + this.id);
+        try
+        {
+            if (!servicePool.awaitTermination(5, TimeUnit.SECONDS))
+            {
+                servicePool.shutdownNow(); // force shutdown if necessary
+            }
+        }
+        catch (InterruptedException e)
+        {
+            servicePool.shutdownNow(); // force shutdown on interruption
+        }
     }
 }
