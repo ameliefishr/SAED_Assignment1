@@ -112,7 +112,7 @@ public class Airport implements Runnable
             }
             catch (InterruptedException e)
             {
-                Thread.currentThread().interrupt();
+                Thread.currentThread().interrupt();a
             }
         }
     }
