@@ -64,6 +64,9 @@ public class Airport implements Runnable
 
     // so far I have not found a need for airport setters, may add later
 
+
+    // service queue functionalities
+    // PRODUCER
     public void putNextFlightRequest(FlightRequest flightRequest) throws InterruptedException
     {
         flightRequestQueue.put(flightRequest);
@@ -74,12 +77,23 @@ public class Airport implements Runnable
         availableQueue.put(availablePlane);
     }
 
+    // CONSUMER
+    public FlightRequest getNextFlightRequest() throws InterruptedException
+    {
+        return flightRequestQueue.take();
+    }
+
+    public Plane getNextAvailablePlane() throws InterruptedException
+    {
+        return availableQueue.take();
+    }
+
     // code for service simulation
     public void servicePlane(Plane newPlane)
     {
         if(!Thread.currentThread().isInterrupted())
         {
-            Service service = new Service(this.id, newPlane, availableQueue);
+            Service service = new Service(this.id, newPlane,this);
             servicePool.submit(service);
             
         }
@@ -101,7 +115,7 @@ public class Airport implements Runnable
             {
                 try
                 {
-                    availableQueue.put(newPlane); // put plane straight into available planes queue
+                    putNextAvailablePlane(newPlane); // put plane straight into available planes queue
                 }
                 catch (InterruptedException e)
                 {
@@ -117,8 +131,8 @@ public class Airport implements Runnable
         {
             try
             {
-                FlightRequest flightRequest = flightRequestQueue.take(); // take a request from the queue (CONSUME)
-                Plane availablePlane = availableQueue.take(); // take an available plane from the queue (CONSUME)
+                FlightRequest flightRequest = getNextFlightRequest(); // take a request from the queue (CONSUME)
+                Plane availablePlane = getNextAvailablePlane(); // take an available plane from the queue (CONSUME)
                 
                 Airport destination = flightRequest.getDestinationAirport(); // get destination from flight request
                 if (destination == null) // null checks

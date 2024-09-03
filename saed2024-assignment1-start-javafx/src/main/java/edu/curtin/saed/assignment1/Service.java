@@ -8,15 +8,15 @@ public class Service implements Runnable
     private int planeId; // command input
     private Plane unservicedPlane; // plane object (to add to availableQueue afterwards)
     private int airportId; // command input
-    private BlockingQueue<Plane> availableQueue; // blocking queue of available planes
+    private Airport airport; // airport service is running from
 
     // constructor
-    public Service(int airportID, Plane plane, BlockingQueue<Plane> availableQueue)
+    public Service(int airportID, Plane plane, Airport airport)
     {
         this.unservicedPlane = plane;
         this.planeId = plane.getId();
         this.airportId = airportID;
-        this.availableQueue = availableQueue;
+        this.airport = airport;
     }
 
     @Override
@@ -42,7 +42,8 @@ public class Service implements Runnable
 
                     System.out.println(endMessage);
                 }
-                availableQueue.put(unservicedPlane); // put freshly serviced plane into queue of available planes (PRODUCER)
+
+                airport.putNextAvailablePlane(unservicedPlane); // put freshly serviced plane into queue of available planes (PRODUCER)
                 System.out.println("Plane ID: " + unservicedPlane.getId() + " is now available for flights.");
             }
             finally
