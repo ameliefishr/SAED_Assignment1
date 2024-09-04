@@ -13,6 +13,7 @@ public class Plane
     private Airport destinationAirport;
     private GridArea area;
     private GridAreaIcon planeIcon;
+    public static final Plane POISON = new Plane(-1, -1, -1, null, null);
 
     public Plane(int id, int xPos, int yPos, Airport currentAirport, GridArea area)
     {
@@ -28,7 +29,12 @@ public class Plane
             this.xPos, this.yPos, random.nextDouble() * 360, 1.0,
             App.class.getClassLoader().getResourceAsStream("pikachu.png"),
             "Plane " + this.id);
-        area.getIcons().add(planeIcon);
+        
+            if (area != null) // null check incase it's the poison plane
+            {
+                area.getIcons().add(planeIcon);
+            }
+
         planeIcon.setShown(false);
     }
 

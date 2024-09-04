@@ -7,7 +7,7 @@ public class FlightRequest implements Runnable
     private int originAirport; // command input
     private AirportManager airportManager; // airport manager instance
     private Airport destinationAirport; // airport id of destination
-    private volatile boolean running = true;
+    public static final FlightRequest POISON = new FlightRequest(-1, -1, null); // Unique IDs for poison pill
 
     // constructor
     public FlightRequest(int numberOfAirports, int originAirportID, AirportManager airportManager)
@@ -22,14 +22,10 @@ public class FlightRequest implements Runnable
         return destinationAirport;
     }
 
-    public void stop() 
-    {
-        running = false; // stop the run loop
-    }
-
     @Override
     public void run()
     {
+
         Process proc; // for running flight request proccess
         if (nAirports >= 2)
         {
@@ -43,14 +39,10 @@ public class FlightRequest implements Runnable
                                 
                 try(BufferedReader br = proc.inputReader())
                 {
+                    
                     String line;
-                    while (running && (line = br.readLine()) != null)
+                    while ((line = br.readLine()) != null)
                     {
-                        if (Thread.currentThread().isInterrupted())
-                        {
-                            break; // exit loop if thread is interrupted
-                        }
-
                         try
                         {
                             int destinationAirportID = Integer.parseInt(line.trim());
@@ -70,6 +62,11 @@ public class FlightRequest implements Runnable
                                 }
                                 System.out.println("Processing flight from airport ID " + originAirport + " to airport ID " + destinationAirportID);
                             }
+                            else
+                            {
+                                Thread.currentThread().interrupt();
+                                break;
+                            }
                         }
                         // I had to add this in because I kept getting jvm memory errors that would print from the bat file and throw this exception
                         // after I fixed my threading they went away but I left this in just incase
@@ -77,12 +74,10 @@ public class FlightRequest implements Runnable
                         {
                             System.out.println("Flight Request output not an integer: " + e.getMessage());
                         }
-                        finally
+
+                        if (proc != null)
                         {
-                            if (proc != null)
-                            {
-                                proc.destroy();  // make sure to destroy proccess when sim is complete
-                            }
+                            proc.destroy();  // make sure to destroy proccess when sim is complete
                         }
                     }
                 }

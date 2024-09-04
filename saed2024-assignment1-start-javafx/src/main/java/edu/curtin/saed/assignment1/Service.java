@@ -43,20 +43,25 @@ public class Service implements Runnable
                     System.out.println(endMessage);
                 }
 
+                try
+                {
                 airport.putNextAvailablePlane(unservicedPlane); // put freshly serviced plane into queue of available planes (PRODUCER)
                 System.out.println("Plane ID: " + unservicedPlane.getId() + " is now available for flights.");
-            }
-            finally
-            {
-                if (proc != null)
+                }
+                
+                catch (InterruptedException e)
                 {
-                    proc.destroy();  // make sure to destroy proccess when sim is complete
+                    Thread.currentThread().interrupt();
                 }
             }
+            if (proc != null)
+            {
+                proc.destroy();  // make sure to destroy proccess when sim is complete
+            }
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException e)
         {
-            Thread.currentThread().interrupt();
+            System.err.println("IOException while proccessing file request");
         }
     }
 }
