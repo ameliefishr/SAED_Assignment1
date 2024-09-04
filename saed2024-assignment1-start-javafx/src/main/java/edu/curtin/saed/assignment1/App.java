@@ -142,27 +142,27 @@ public class App extends Application
     }
 
     // methods to increment counts, using synchronization for thread safety
-    public synchronized void incrementInFlightCount() {
+    public void incrementInFlightCount() {
         inFlightCount++;
         updateStatusText();
     }
 
-    public synchronized void incrementUndergoingServiceCount() {
+    public void incrementUndergoingServiceCount() {
         undergoingServiceCount++;
         updateStatusText();
     }
 
-    public synchronized void incrementCompletedFlightsCount() {
+    public void incrementCompletedFlightsCount() {
         completedFlightsCount++;
         updateStatusText();
     }
 
-    public synchronized void decrementInFlightCount() {
+    public void decrementInFlightCount() {
         inFlightCount--;
         updateStatusText();
     }
 
-    public synchronized void decrementUndergoingServiceCount() {
+    public void decrementUndergoingServiceCount() {
         undergoingServiceCount--;
         updateStatusText();
     }
