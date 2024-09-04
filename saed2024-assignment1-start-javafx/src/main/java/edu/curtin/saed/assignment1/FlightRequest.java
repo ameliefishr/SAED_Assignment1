@@ -18,6 +18,7 @@ public class FlightRequest implements Runnable
         this.airportManager = airportManager;
     }
 
+    // returns destination airport generatred by flight request
     public Airport getDestinationAirport()
     {
         return destinationAirport;
@@ -82,7 +83,7 @@ public class FlightRequest implements Runnable
             }
             catch (IOException e)
             {
-                System.err.println("IOException while proccessing file request");
+                System.err.println("Error while proccessing file request");
             }
         }
 

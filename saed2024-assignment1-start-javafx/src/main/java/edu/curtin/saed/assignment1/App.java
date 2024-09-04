@@ -34,8 +34,8 @@ public class App extends Application
     private int inFlightCount = 0;
     private int undergoingServiceCount = 0;
     private int completedFlightsCount = 0;
-    private AirportManager airportManager = new AirportManager();
-    private TextArea textArea;
+    private AirportManager airportManager = new AirportManager(); // initializing an airport manager instance to be used by all classes
+    private TextArea textArea; // had to promote textArea and statusArea to class variables
     private Label statusText;
     public static void main(String[] args)
     {
@@ -141,7 +141,7 @@ public class App extends Application
         stage.show();
     }
 
-    // methods to increment counts, using synchronization for thread safety
+    // methods to increment/decrement counts, and update the status text
     public void incrementInFlightCount() {
         inFlightCount++;
         updateStatusText();
@@ -173,6 +173,7 @@ public class App extends Application
         textArea.appendText(update + "\n");
     }
 
+    // update status text to reflect current counts
     private void updateStatusText() 
     {
         Platform.runLater(() -> {statusText.setText("In Flight: " + inFlightCount + " | Undergoing Service: " + undergoingServiceCount + " | Completed Trips: " + completedFlightsCount);});

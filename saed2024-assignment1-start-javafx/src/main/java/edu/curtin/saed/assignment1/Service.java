@@ -26,7 +26,6 @@ public class Service implements Runnable
         try
         {
             // run service proccess
-            //System.out.println("Starting service for plane ID: " + planeId + " at airport ID: " + airportId);
             proc = Runtime.getRuntime().exec(
                 new String[]{"C:/Users/ameli/SAED_Assignment1/saed2024-assignment1-start-javafx/comms/bin/saed_plane_service.bat",
                              String.valueOf(airportId),
@@ -40,13 +39,11 @@ public class Service implements Runnable
                 {
                     String endMessage = line;
                     airport.printEndMessage(endMessage);
-                   // System.out.println(endMessage);
                 }
 
                 try
                 {
-                airport.putNextAvailablePlane(unservicedPlane); // put freshly serviced plane into queue of available planes (PRODUCER)
-                // System.out.println("Plane ID: " + unservicedPlane.getId() + " is now available for flights");
+                    airport.putNextAvailablePlane(unservicedPlane); // put freshly serviced plane into queue of available planes (PRODUCER)
                 }
                 
                 catch (InterruptedException e)
@@ -61,7 +58,7 @@ public class Service implements Runnable
         }
         catch (IOException e)
         {
-            System.err.println("IOException while proccessing file request");
+            System.err.println("Error while proccessing file request");
         }
     }
 }

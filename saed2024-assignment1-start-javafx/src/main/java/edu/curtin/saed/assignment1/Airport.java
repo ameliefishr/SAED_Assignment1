@@ -15,7 +15,7 @@ public class Airport implements Runnable
     private int id;
     private int xPos;
     private int yPos;
-    private boolean running;
+    private boolean running; // to alert other airports whether this airport can receive flights
     private BlockingQueue<Plane> availableQueue; // queue for available planes
     private BlockingQueue<FlightRequest> flightRequestQueue; // queue for fight requests
     private ExecutorService servicePool;
@@ -77,9 +77,8 @@ public class Airport implements Runnable
 
     // so far I have not found a need for airport setters, may add later
 
-
-    // service queue functionalities
-    // PRODUCER
+    // service queue functionalities for producer/consumer pattern
+    // ## PRODUCERS ##
     public void putNextFlightRequest(FlightRequest flightRequest) throws InterruptedException
     {
         flightRequestQueue.put(flightRequest);
@@ -90,7 +89,7 @@ public class Airport implements Runnable
         availableQueue.put(availablePlane);
     }
 
-    // CONSUMER
+    // ## CONSUMERS ##
     public FlightRequest getNextFlightRequest() throws InterruptedException
     {
         return flightRequestQueue.take();
@@ -113,6 +112,7 @@ public class Airport implements Runnable
         }
     }
 
+    // prints endmessage from service proccess to textArea
     public void printEndMessage(String endMessage)
     {
         app.decrementUndergoingServiceCount();
@@ -227,9 +227,10 @@ public class Airport implements Runnable
         }
     }
 
+    // shutdown approach learnt from: https://www.alibabacloud.com/blog/java-development-practices-using-thread-pools-and-thread-variables-properly_600180#:~:text=We%20should%20call%20the%20shutdown,the%20thread%20pool%20is%20closed.
     public void shutdown()
     {
-        running = false; // make sure no planes try to fly to airport after it's shutdown
+        running = false; // to make sure no planes try to fly to airport after it's shutdown
         try
         {
             servicePool.shutdown();// shut down service thread pool 
@@ -241,7 +242,7 @@ public class Airport implements Runnable
 
         catch (InterruptedException e)
         {
-            servicePool.shutdownNow(); // force shutdown on interruption
+            servicePool.shutdownNow(); // if it's interrupt still make sure it shuts down properly
             Thread.currentThread().interrupt();
         }
 

@@ -162,7 +162,6 @@ public class Plane
                     if(destinationAirport.isRunning()) // check of airport is still running (not shutdown)
                     {
                         Platform.runLater(() -> app.addUpdate("Plane " + this.id + " has landed at Airport " + destinationId));
-                        //System.out.println("Plane " + id + " has reached the destination at (" + destinationAirport.getX() + ", " + destinationAirport.getY() + ")");
                         setCurrentAirport(destinationAirport);
                         destinationAirport.receivePlane(this);
                         app.decrementInFlightCount();
