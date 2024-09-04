@@ -7,6 +7,7 @@ public class FlightRequest implements Runnable
     private int originAirport; // command input
     private AirportManager airportManager; // airport manager instance
     private Airport destinationAirport; // airport id of destination
+
     public static final FlightRequest POISON = new FlightRequest(-1, -1, null); // Unique IDs for poison pill
 
     // constructor
@@ -25,9 +26,8 @@ public class FlightRequest implements Runnable
     @Override
     public void run()
     {
-
         Process proc; // for running flight request proccess
-        if (nAirports >= 2)
+        if (nAirports >= 2 && originAirport >= 0) // checks to see if it satisfies command line arg structure
         {
             try
             {
@@ -39,14 +39,12 @@ public class FlightRequest implements Runnable
                                 
                 try(BufferedReader br = proc.inputReader())
                 {
-                    
                     String line;
                     while ((line = br.readLine()) != null)
                     {
                         try
                         {
                             int destinationAirportID = Integer.parseInt(line.trim());
-                            System.out.println("Received flight request to airport ID: " + destinationAirportID);
                             this.destinationAirport = airportManager.getAirportById(destinationAirportID);
 
                             if(destinationAirport != null && destinationAirport.isRunning())
@@ -60,7 +58,6 @@ public class FlightRequest implements Runnable
                                 {
                                     Thread.currentThread().interrupt();
                                 }
-                                System.out.println("Processing flight from airport ID " + originAirport + " to airport ID " + destinationAirportID);
                             }
                             else
                             {
@@ -88,5 +85,6 @@ public class FlightRequest implements Runnable
                 System.err.println("IOException while proccessing file request");
             }
         }
+
     }
 }

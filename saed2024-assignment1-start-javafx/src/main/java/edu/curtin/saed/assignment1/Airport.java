@@ -7,6 +7,8 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javafx.application.Platform;
+
 public class Airport implements Runnable
 {
     // initializing variables
@@ -17,9 +19,10 @@ public class Airport implements Runnable
     private BlockingQueue<Plane> availableQueue; // queue for available planes
     private BlockingQueue<FlightRequest> flightRequestQueue; // queue for fight requests
     private ExecutorService servicePool;
+    private App app;
 
     // constructor
-    public Airport(int id, int xPos, int yPos)
+    public Airport(int id, int xPos, int yPos, App app)
     {
         this.id = id;
         this.xPos = xPos;
@@ -27,6 +30,7 @@ public class Airport implements Runnable
         this.availableQueue = new LinkedBlockingQueue<>(); // linked blocking queue for producer/consumer scenario
         this.flightRequestQueue = new LinkedBlockingQueue<>();
         this.running = true;
+        this.app = app;
         Thread airportThread = new Thread(this);
         airportThread.setName("Airport " + id);
         airportThread.start();
@@ -102,10 +106,18 @@ public class Airport implements Runnable
     {
         if(!Thread.currentThread().isInterrupted())
         {
+            app.incrementUndergoingServiceCount();
             Service service = new Service(this.id, newPlane,this);
             servicePool.submit(service);
             
         }
+    }
+
+    public void printEndMessage(String endMessage)
+    {
+        app.decrementUndergoingServiceCount();
+        Platform.runLater(() -> app.addUpdate(endMessage));
+        
     }
 
     public void receivePlane(Plane newPlane)
@@ -174,19 +186,42 @@ public class Airport implements Runnable
         }
     }
 
-    public void shutDownAirport()
-    {
-        Thread.currentThread().interrupt();
-    }
-
     @Override
     public void run() 
     {
         try
         {
-            handleFlightRequests();
+            while(running && !Thread.currentThread().isInterrupted())
+            {
+                FlightRequest flightRequest = getNextFlightRequest(); // take a request from the queue (CONSUME)
+                
+                if(flightRequest == FlightRequest.POISON)
+                {
+                    break; // if poison object detected break loop
+                }
+                
+                Plane availablePlane = getNextAvailablePlane(); // take an available plane from the queue (CONSUME)
+                
+                if(availablePlane == Plane.POISON) // if poison object detected break loop
+                {
+                    break;
+                }
+
+                Airport destination = flightRequest.getDestinationAirport(); // get destination from flight request
+                if (destination == null) // null checks
+                {
+                    System.out.println("Error: destination was null");
+                } 
+
+                else
+                {
+                    availablePlane.setDestinationAirport(destination); // setting new destination from flight request
+                    availablePlane.flyToDestination(); // begin flying to destination
+                }
+                
+            }
         }
-        catch(InterruptedException e)
+        catch (InterruptedException e)
         {
             Thread.currentThread().interrupt();
         }
@@ -207,7 +242,7 @@ public class Airport implements Runnable
         catch (InterruptedException e)
         {
             servicePool.shutdownNow(); // force shutdown on interruption
-            shutDownAirport();
+            Thread.currentThread().interrupt();
         }
 
         // passing poison object to blocking queue's
@@ -222,8 +257,6 @@ public class Airport implements Runnable
             Thread.currentThread().interrupt();
         }
     
-
-        shutDownAirport();// stop airport thread
         System.out.println("Shutting down airport ID: " + this.id);
     }
 }

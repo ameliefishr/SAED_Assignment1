@@ -13,9 +13,10 @@ public class Plane
     private Airport destinationAirport;
     private GridArea area;
     private GridAreaIcon planeIcon;
-    public static final Plane POISON = new Plane(-1, -1, -1, null, null);
+    private App app;
+    public static final Plane POISON = new Plane(-1, -1, -1, null, null, null);
 
-    public Plane(int id, int xPos, int yPos, Airport currentAirport, GridArea area)
+    public Plane(int id, int xPos, int yPos, Airport currentAirport, GridArea area, App app)
     {
         this.id = id;
         this.xPos = xPos;
@@ -23,6 +24,7 @@ public class Plane
         this.currentAirport = currentAirport;
         this.destinationAirport = null;
         this.area = area;
+        this.app = app;
 
         Random random = new Random();
         this.planeIcon = new GridAreaIcon(
@@ -117,8 +119,12 @@ public class Plane
         //checking if a destination exists and that the plane isn't already there
         if(destinationAirport != null && destinationAirport.isRunning())
         {
+            int destinationId = destinationAirport.getId();
             if(xPos != destinationAirport.getX() && yPos != destinationAirport.getY())
             {
+                app.incrementInFlightCount();
+                Platform.runLater(() -> app.addUpdate("Plane " + this.id + " has begun flying to Airport " + destinationId));
+                
                 // calculate direction movements based on current position
                 int movementX = Integer.compare(destinationAirport.getX(), xPos);
                 int movementY = Integer.compare(destinationAirport.getY(), yPos); 
@@ -153,11 +159,14 @@ public class Plane
                     }
 
                     // once plane has reached new destination
-                    if(destinationAirport.isRunning())
+                    if(destinationAirport.isRunning()) // check of airport is still running (not shutdown)
                     {
-                        System.out.println("Plane " + id + " has reached the destination at (" + destinationAirport.getX() + ", " + destinationAirport.getY() + ")");
+                        Platform.runLater(() -> app.addUpdate("Plane " + this.id + " has landed at Airport " + destinationId));
+                        //System.out.println("Plane " + id + " has reached the destination at (" + destinationAirport.getX() + ", " + destinationAirport.getY() + ")");
                         setCurrentAirport(destinationAirport);
                         destinationAirport.receivePlane(this);
+                        app.decrementInFlightCount();
+                        app.incrementCompletedFlightsCount();
                     }
             }
             setVisibility(false); //once landed, make plane invisible

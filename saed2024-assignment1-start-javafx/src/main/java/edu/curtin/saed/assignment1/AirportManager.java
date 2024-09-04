@@ -90,10 +90,11 @@ public class AirportManager
         try
         {
             flightRequestPool.shutdown(); // shutdown thread pool
+            System.out.println("Shutting down flight request pool...");
             if (!flightRequestPool.awaitTermination(5, TimeUnit.SECONDS))
             {
                 System.out.println("Forcefully shutting down flight request pool...");
-                flightRequestPool.shutdownNow(); // force shutdown
+                flightRequestPool.shutdownNow(); // force shutdown after 5 secs
             }
         }
         catch (InterruptedException e)
@@ -102,7 +103,6 @@ public class AirportManager
             Thread.currentThread().interrupt();
         }
 
-        System.out.println("Shutting down flight request pool...");
         for (Airport airport : airportMap.values()) // call shutdown on each airport
         {
             airport.shutdown();

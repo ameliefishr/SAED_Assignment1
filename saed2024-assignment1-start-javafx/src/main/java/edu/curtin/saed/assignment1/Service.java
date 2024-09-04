@@ -1,7 +1,7 @@
 package edu.curtin.saed.assignment1;
 
 import java.io.*;
-import java.util.concurrent.BlockingQueue;
+
 
 public class Service implements Runnable
 {
@@ -39,14 +39,14 @@ public class Service implements Runnable
                 while ((line = br.readLine()) != null && !Thread.currentThread().isInterrupted())
                 {
                     String endMessage = line;
-
+                    airport.printEndMessage(endMessage);
                     System.out.println(endMessage);
                 }
 
                 try
                 {
                 airport.putNextAvailablePlane(unservicedPlane); // put freshly serviced plane into queue of available planes (PRODUCER)
-                System.out.println("Plane ID: " + unservicedPlane.getId() + " is now available for flights.");
+                // System.out.println("Plane ID: " + unservicedPlane.getId() + " is now available for flights");
                 }
                 
                 catch (InterruptedException e)

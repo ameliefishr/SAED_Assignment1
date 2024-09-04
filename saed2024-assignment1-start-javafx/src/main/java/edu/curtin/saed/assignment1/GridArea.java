@@ -4,8 +4,6 @@ package edu.curtin.saed.assignment1;
 
 import javafx.geometry.VPos;
 import javafx.scene.canvas.*;
-import javafx.scene.transform.Affine;
-import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;

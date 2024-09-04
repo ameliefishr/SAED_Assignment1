@@ -1,6 +1,7 @@
 package edu.curtin.saed.assignment1;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -24,14 +25,18 @@ import javafx.stage.Stage;
  * local variables to fields if needed.
  */
 import java.util.Random;
-import java.util.Set;
 public class App extends Application
 {
     private static final int GRID_WIDTH = 10;
     private static final int GRID_HEIGHT = 10;
     private int startCount = 0;
+    private int endCount = 0;
+    private int inFlightCount = 0;
+    private int undergoingServiceCount = 0;
+    private int completedFlightsCount = 0;
     private AirportManager airportManager = new AirportManager();
-
+    private TextArea textArea;
+    private Label statusText;
     public static void main(String[] args)
     {
         launch();
@@ -57,7 +62,7 @@ public class App extends Application
 
             // creating airports (default 10)
             // airport creation also handles service queue & available queue set-up
-            Airport newAirport = new Airport(airportId, x, y);
+            Airport newAirport = new Airport(airportId, x, y, this);
             airportManager.addAirport(newAirport);            
 
             // adding airports to grid 
@@ -71,14 +76,13 @@ public class App extends Application
             for (int j = 0; j < 10; j++)
             {
                 int planeId = j;
-                Plane plane = new Plane(planeId, x, y, newAirport, area);
+                Plane plane = new Plane(planeId, x, y, newAirport, area, this);
                 newAirport.receivePlane(plane);
             }
         }
     
 
         // Set up other key parts of the user interface. You'll also want to adjust this.
-
         var startBtn = new Button("Start");
         var endBtn = new Button("End");
 
@@ -95,19 +99,25 @@ public class App extends Application
         {
             airportManager.shutdown();
             System.out.println("End button pressed");
+            endCount++;
         });
         stage.setOnCloseRequest((event) ->
         {
-            airportManager.shutdown();
-            System.out.println("Close button pressed");
-            Set<Thread> threads = Thread.getAllStackTraces().keySet();
-            System.out.printf("%-15s \t %-15s \t %-15s \t %s\n", "Name", "State", "Priority", "isDaemon");
-            for (Thread t : threads) {
-            System.out.printf("%-15s \t %-15s \t %-15d \t %s\n", t.getName(), t.getState(), t.getPriority(), t.isDaemon());
+            if(endCount == 0) // if threads are already shutdown, no need to do it again
+            {
+                airportManager.shutdown(); 
             }
+            System.out.println("Close button pressed");
+
+            // ## FOR DEBUGGING THREAD TERMINATION ## //
+            // Set<Thread> threads = Thread.getAllStackTraces().keySet();
+            // System.out.printf("%-15s \t %-15s \t %-15s \t %s\n", "Name", "State", "Priority", "isDaemon");
+            // for (Thread t : threads) {
+            // System.out.printf("%-15s \t %-15s \t %-15d \t %s\n", t.getName(), t.getState(), t.getPriority(), t.isDaemon());
+            // }
         });
-        var statusText = new Label("Label Text"); // TO DO: update status here
-        var textArea = new TextArea(); // TO DO: put simulation updates here
+        statusText = new Label("In Flight: 0 | Undergoing Service: 0 | Completed Trips: 0"); // TO DO: update status here
+        textArea = new TextArea(); // TO DO: put simulation updates here
         textArea.appendText("Sidebar\n");
         textArea.appendText("Text\n");
 
@@ -129,5 +139,42 @@ public class App extends Application
         var scene = new Scene(contentPane, 1200, 1000);
         stage.setScene(scene);
         stage.show();
+    }
+
+    // methods to increment counts, using synchronization for thread safety
+    public synchronized void incrementInFlightCount() {
+        inFlightCount++;
+        updateStatusText();
+    }
+
+    public synchronized void incrementUndergoingServiceCount() {
+        undergoingServiceCount++;
+        updateStatusText();
+    }
+
+    public synchronized void incrementCompletedFlightsCount() {
+        completedFlightsCount++;
+        updateStatusText();
+    }
+
+    public synchronized void decrementInFlightCount() {
+        inFlightCount--;
+        updateStatusText();
+    }
+
+    public synchronized void decrementUndergoingServiceCount() {
+        undergoingServiceCount--;
+        updateStatusText();
+    }
+
+    // update flight statuses to the UI
+    public void addUpdate(String update)
+    {
+        textArea.appendText(update + "\n");
+    }
+
+    private void updateStatusText() 
+    {
+        Platform.runLater(() -> {statusText.setText("In Flight: " + inFlightCount + " | Undergoing Service: " + undergoingServiceCount + " | Completed Trips: " + completedFlightsCount);});
     }
 }
