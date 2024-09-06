@@ -33,53 +33,75 @@ public class FlightRequest implements Runnable
             try
             {
                 System.out.println("Starting flight requests for origin airport ID: " + originAirport);
-                proc = Runtime.getRuntime().exec(
-                    new String[]{"C:/Users/ameli/SAED_Assignment1/saed2024-assignment1-start-javafx/comms/bin/saed_flight_requests.bat",
-                                String.valueOf(nAirports),
-                                String.valueOf(originAirport)});
-                                
-                try(BufferedReader br = proc.inputReader())
+                try
                 {
-                    String line;
-                    while ((line = br.readLine()) != null)
+                    // try UNIX version
+                    proc = Runtime.getRuntime().exec(
+                        new String[]{"C:/Users/ameli/SAED_Assignment1/saed2024-assignment1-start-javafx/comms/bin/saed_flight_requests",
+                                    String.valueOf(nAirports),
+                                    String.valueOf(originAirport)});
+                }
+                catch (IOException e1)
+                {
+                    try
                     {
-                        try
-                        {
-                            int destinationAirportID = Integer.parseInt(line.trim());
-                            this.destinationAirport = airportManager.getAirportById(destinationAirportID);
-
-                            if(destinationAirport != null && destinationAirport.isRunning())
-                            {
-                                Airport currentAirport = airportManager.getAirportById(originAirport);
-                                try
-                                {
-                                    currentAirport.putNextFlightRequest(this);
-                                }
-                                catch (InterruptedException e)
-                                {
-                                    Thread.currentThread().interrupt();
-                                }
-                            }
-                            else
-                            {
-                                Thread.currentThread().interrupt();
-                                break;
-                            }
-                        }
-                        // I had to add this in because I kept getting jvm memory errors that would print from the bat file and throw this exception
-                        // after I fixed my threading they went away but I left this in just incase
-                        catch(NumberFormatException e) 
-                        {
-                            System.out.println("Flight Request output not an integer: " + e.getMessage());
-                        }
-
-                        if (proc != null)
-                        {
-                            proc.destroy();  // make sure to destroy proccess when sim is complete
-                        }
+                        // try windows version
+                        proc = Runtime.getRuntime().exec(
+                            new String[]{"C:/Users/ameli/SAED_Assignment1/saed2024-assignment1-start-javafx/comms/bin/saed_flight_requests.bat",
+                                        String.valueOf(nAirports),
+                                        String.valueOf(originAirport)});
+                    }
+                    catch(IOException e2)
+                    {
+                        System.err.println("Error executing batch file: " + e2.getMessage());
+                        e2.printStackTrace();
+                        proc = null;
                     }
                 }
                 
+                if(proc != null) // null check incase batch file reading failed
+                {
+                    try(BufferedReader br = proc.inputReader())
+                    {
+                        String line;
+                        while ((line = br.readLine()) != null)
+                        {
+                            try
+                            {
+                                int destinationAirportID = Integer.parseInt(line.trim());
+                                this.destinationAirport = airportManager.getAirportById(destinationAirportID);
+
+                                if(destinationAirport != null && destinationAirport.isRunning())
+                                {
+                                    Airport currentAirport = airportManager.getAirportById(originAirport);
+                                    try
+                                    {
+                                        currentAirport.putNextFlightRequest(this);
+                                    }
+                                    catch (InterruptedException e)
+                                    {
+                                        Thread.currentThread().interrupt();
+                                    }
+                                }
+                                else
+                                {
+                                    Thread.currentThread().interrupt();
+                                    break;
+                                }
+                            }
+                            // I had to add this in because I kept getting jvm memory errors that would print from the bat file and throw this exception
+                            // after I fixed my threading they went away but I left this in just incase
+                            catch(NumberFormatException e) 
+                            {
+                                System.out.println("Flight Request output not an integer: " + e.getMessage());
+                            }
+
+    
+                            proc.destroy();  // make sure to destroy proccess when sim is complete
+                        
+                        }
+                    }
+                }
             }
             catch (IOException e)
             {

@@ -26,11 +26,34 @@ public class Service implements Runnable
         try
         {
             // run service proccess
+            try
+            {
+                // try UNIX version
             proc = Runtime.getRuntime().exec(
-                new String[]{"C:/Users/ameli/SAED_Assignment1/saed2024-assignment1-start-javafx/comms/bin/saed_plane_service.bat",
+                new String[]{"C:/Users/ameli/SAED_Assignment1/saed2024-assignment1-start-javafx/comms/bin/saed_plane_service",
                              String.valueOf(airportId),
                              String.valueOf(planeId)});
-                             
+            }
+            catch (IOException e1)
+            {
+                try
+                {
+                    // try windows version
+                    proc = Runtime.getRuntime().exec(
+                        new String[]{"C:/Users/ameli/SAED_Assignment1/saed2024-assignment1-start-javafx/comms/bin/saed_plane_service.bat",
+                                     String.valueOf(airportId),
+                                     String.valueOf(planeId)});
+                }
+                catch (IOException e2)
+                {
+                    System.err.println("Error executing batch file: " + e2.getMessage());
+                    e2.printStackTrace();
+                    proc = null;
+                }
+
+            }
+
+            if(proc != null) // null check incase batch file reading failed
             try(BufferedReader br = proc.inputReader())
             {
                 String line;

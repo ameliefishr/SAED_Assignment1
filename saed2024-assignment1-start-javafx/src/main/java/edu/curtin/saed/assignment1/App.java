@@ -116,10 +116,8 @@ public class App extends Application
             // System.out.printf("%-15s \t %-15s \t %-15d \t %s\n", t.getName(), t.getState(), t.getPriority(), t.isDaemon());
             // }
         });
-        statusText = new Label("In Flight: 0 | Undergoing Service: 0 | Completed Trips: 0"); // TO DO: update status here
-        textArea = new TextArea(); // TO DO: put simulation updates here
-        textArea.appendText("Sidebar\n");
-        textArea.appendText("Text\n");
+        statusText = new Label("In Flight: 0 | Undergoing Service: 0 | Completed Trips: 0"); 
+        textArea = new TextArea(); 
 
 
         // Below is basically just the GUI "plumbing" (connecting things together).
