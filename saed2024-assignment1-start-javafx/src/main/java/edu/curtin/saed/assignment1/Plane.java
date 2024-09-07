@@ -132,6 +132,10 @@ public class Plane
                 // move towards the destination in a loop until it is reached
                 while (xPos != destinationAirport.getX() || yPos != destinationAirport.getY() && destinationAirport.isRunning())
                 {
+                    if(!app.isRunning() || !destinationAirport.isRunning())
+                    {   
+                        break; // stop movement if simulation stops
+                    }
                     if (xPos != destinationAirport.getX())
                     {
                         xPos += movementX;

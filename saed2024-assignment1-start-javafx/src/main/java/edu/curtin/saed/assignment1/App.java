@@ -37,6 +37,7 @@ public class App extends Application
     private AirportManager airportManager = new AirportManager(); // initializing an airport manager instance to be used by all classes
     private TextArea textArea; // had to promote textArea and statusArea to class variables
     private Label statusText;
+    private boolean simulationRunning = false;
     public static void main(String[] args)
     {
         launch();
@@ -75,7 +76,7 @@ public class App extends Application
             // creating planes for each airport (default 10 per airport)
             for (int j = 0; j < 10; j++)
             {
-                int planeId = j;
+                int planeId = i * 10 + j;
                 Plane plane = new Plane(planeId, x, y, newAirport, area, this);
                 newAirport.receivePlane(plane);
             }
@@ -90,6 +91,7 @@ public class App extends Application
         {
             if(startCount == 0) // ensuring flight request process is only started once
             {
+                simulationRunning = true;
                 airportManager.startFlightRequests(); // using airport manager to start a flight request proccess for each created airport
             }
             System.out.println("Start button pressed");
@@ -97,15 +99,24 @@ public class App extends Application
         });
         endBtn.setOnAction((event) ->
         {
-            airportManager.shutdown();
+            if(startCount == 0 | endCount > 1)
+            {
+                addUpdate("Cannot end simulation, simulation is not running");
+            }
+            else
+            {
+                airportManager.shutdown();
+                endCount++;
+                simulationRunning = false;
+            }
             System.out.println("End button pressed");
-            endCount++;
         });
         stage.setOnCloseRequest((event) ->
         {
             if(endCount == 0) // if threads are already shutdown, no need to do it again
             {
                 airportManager.shutdown(); 
+                simulationRunning = false;
             }
             System.out.println("Close button pressed");
 
@@ -140,28 +151,43 @@ public class App extends Application
 
     // methods to increment/decrement counts, and update the status text
     public void incrementInFlightCount() {
-        inFlightCount++;
-        updateStatusText();
+        if(simulationRunning)
+        {
+            inFlightCount++;
+            updateStatusText();
+        }
     }
 
     public void incrementUndergoingServiceCount() {
-        undergoingServiceCount++;
-        updateStatusText();
+        if(simulationRunning)
+        {
+            undergoingServiceCount++;
+            updateStatusText();
+        }
     }
 
     public void incrementCompletedFlightsCount() {
-        completedFlightsCount++;
-        updateStatusText();
+        if(simulationRunning)
+        {
+            completedFlightsCount++;
+            updateStatusText();
+        }
     }
 
     public void decrementInFlightCount() {
-        inFlightCount--;
-        updateStatusText();
+        if(simulationRunning)
+        {
+            inFlightCount--;
+            updateStatusText();
+        }
     }
 
     public void decrementUndergoingServiceCount() {
-        undergoingServiceCount--;
-        updateStatusText();
+        if (simulationRunning)
+        {
+            undergoingServiceCount--;
+            updateStatusText();
+        }
     }
 
     // update flight statuses to the UI
@@ -171,8 +197,13 @@ public class App extends Application
     }
 
     // update status text to reflect current counts
-    private void updateStatusText() 
+    public void updateStatusText() 
     {
         Platform.runLater(() -> {statusText.setText("In Flight: " + inFlightCount + " | Undergoing Service: " + undergoingServiceCount + " | Completed Trips: " + completedFlightsCount);});
+    }
+
+    public boolean isRunning()
+    {
+        return simulationRunning;
     }
 }
