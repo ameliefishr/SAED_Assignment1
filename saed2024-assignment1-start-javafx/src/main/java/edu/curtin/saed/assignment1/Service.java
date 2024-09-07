@@ -47,36 +47,35 @@ public class Service implements Runnable
                 catch (IOException e2)
                 {
                     System.err.println("Error executing batch file: " + e2.getMessage());
-                    e2.printStackTrace();
                     proc = null;
                 }
 
             }
 
             if(proc != null) // null check incase batch file reading failed
-            try(BufferedReader br = proc.inputReader())
             {
-                String line;
-            
-                while ((line = br.readLine()) != null && !Thread.currentThread().isInterrupted())
+                try(BufferedReader br = proc.inputReader())
                 {
-                    String endMessage = line;
-                    airport.printEndMessage(endMessage);
-                }
-
-                try
-                {
-                    airport.putNextAvailablePlane(unservicedPlane); // put freshly serviced plane into queue of available planes (PRODUCER)
-                }
+                    String line;
                 
-                catch (InterruptedException e)
-                {
-                    Thread.currentThread().interrupt();
+                    while ((line = br.readLine()) != null && !Thread.currentThread().isInterrupted())
+                    {
+                        String endMessage = line;
+                        airport.printEndMessage(endMessage);
+                    }
+
+                    try
+                    {
+                        airport.putNextAvailablePlane(unservicedPlane); // put freshly serviced plane into queue of available planes (PRODUCER)
+                    }
+                    
+                    catch (InterruptedException e)
+                    {
+                        Thread.currentThread().interrupt();
+                    }
+
+                    proc.destroy();  // make sure to destroy proccess when sim is complete
                 }
-            }
-            if (proc != null)
-            {
-                proc.destroy();  // make sure to destroy proccess when sim is complete
             }
         }
         catch (IOException e)

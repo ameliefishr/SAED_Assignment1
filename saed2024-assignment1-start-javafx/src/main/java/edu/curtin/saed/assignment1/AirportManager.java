@@ -78,6 +78,8 @@ public class AirportManager
 
         for (Integer airportId : airportMap.keySet())
         {
+            Airport airport = getAirportById(airportId);
+            airport.start();
             FlightRequest flightRequest = new FlightRequest(nAirports, airportId, this);
             flightRequestPool.submit(flightRequest); // use the thread pool to handle flight requests
 

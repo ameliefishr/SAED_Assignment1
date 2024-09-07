@@ -119,7 +119,6 @@ public class App extends Application
         statusText = new Label("In Flight: 0 | Undergoing Service: 0 | Completed Trips: 0"); 
         textArea = new TextArea(); 
 
-
         // Below is basically just the GUI "plumbing" (connecting things together).
 
         var toolbar = new ToolBar();

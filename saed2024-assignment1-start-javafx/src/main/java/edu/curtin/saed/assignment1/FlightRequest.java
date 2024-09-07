@@ -54,7 +54,6 @@ public class FlightRequest implements Runnable
                     catch(IOException e2)
                     {
                         System.err.println("Error executing batch file: " + e2.getMessage());
-                        e2.printStackTrace();
                         proc = null;
                     }
                 }

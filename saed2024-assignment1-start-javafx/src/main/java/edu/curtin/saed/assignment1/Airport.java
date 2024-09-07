@@ -20,6 +20,7 @@ public class Airport implements Runnable
     private BlockingQueue<FlightRequest> flightRequestQueue; // queue for fight requests
     private ExecutorService servicePool;
     private App app;
+    private Thread airportThread;
 
     // constructor
     public Airport(int id, int xPos, int yPos, App app)
@@ -31,9 +32,8 @@ public class Airport implements Runnable
         this.flightRequestQueue = new LinkedBlockingQueue<>();
         this.running = true;
         this.app = app;
-        Thread airportThread = new Thread(this);
+        airportThread = new Thread(this);
         airportThread.setName("Airport " + id);
-        airportThread.start();
 
         // taken from 'Listing 21: Some way to obtain executors', in the Week 3 Lecture Notes
         this.servicePool = new ThreadPoolExecutor(
@@ -76,6 +76,11 @@ public class Airport implements Runnable
     }
 
     // so far I have not found a need for airport setters, may add later
+
+    public void start()
+    {
+        airportThread.start();
+    }
 
     // service queue functionalities for producer/consumer pattern
     // ## PRODUCERS ##
