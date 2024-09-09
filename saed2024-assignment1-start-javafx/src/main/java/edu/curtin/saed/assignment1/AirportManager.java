@@ -3,7 +3,7 @@ package edu.curtin.saed.assignment1;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -24,9 +24,9 @@ public class AirportManager
         
         // taken from 'Listing 21: Some way to obtain executors', in the Week 3 Lecture Notes
         this.flightRequestPool = new ThreadPoolExecutor(
-            4, 10, // min 4 threads max 10
-            15, TimeUnit.SECONDS, // destroy any idle threads after 15 sec
-            new SynchronousQueue<>(), // used to deliver new tasks to the threads
+            Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors() * 2, // core thread pool set to number of proccessors, max set to double that
+            15, TimeUnit.SECONDS, // destroy any idle threads after 15 sec (although these threads are unlikely to become idle)
+            new LinkedBlockingQueue<>(), // used to deliver new tasks to the threads
             new NamedThreadFactory("Flight Request") // naming thread for easy tracking
         );
    }

@@ -54,7 +54,7 @@ public class App extends Application
         area.setStyle("-fx-background-color: #73c8a1;");
 
         Random random = new Random();
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++) // change loop size if you want to create more airports
         {
             int x = random.nextInt(GRID_WIDTH);
             int y = random.nextInt(GRID_HEIGHT);
@@ -76,7 +76,7 @@ public class App extends Application
             // creating planes for each airport (default 10 per airport)
             for (int j = 0; j < 10; j++)
             {
-                int planeId = i * 10 + j;
+                int planeId = i * 10 + j; // creating unique id
                 Plane plane = new Plane(planeId, x, y, newAirport, area, this);
                 newAirport.receivePlane(plane);
             }
@@ -105,9 +105,9 @@ public class App extends Application
             }
             else
             {
+                simulationRunning = false;
                 airportManager.shutdown();
                 endCount++;
-                simulationRunning = false;
             }
             System.out.println("End button pressed");
         });
@@ -115,8 +115,8 @@ public class App extends Application
         {
             if(endCount == 0) // if threads are already shutdown, no need to do it again
             {
-                airportManager.shutdown(); 
                 simulationRunning = false;
+                airportManager.shutdown(); 
             }
             System.out.println("Close button pressed");
 

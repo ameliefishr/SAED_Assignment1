@@ -108,7 +108,7 @@ public class Airport implements Runnable
     // code for service simulation
     public void servicePlane(Plane newPlane)
     {
-        if(!Thread.currentThread().isInterrupted())
+        if(!Thread.currentThread().isInterrupted() && app.isRunning())
         {
             app.incrementUndergoingServiceCount();
             Service service = new Service(this.id, newPlane,this);
@@ -120,8 +120,11 @@ public class Airport implements Runnable
     // prints endmessage from service proccess to textArea
     public void printEndMessage(String endMessage)
     {
-        app.decrementUndergoingServiceCount();
-        Platform.runLater(() -> app.addUpdate(endMessage));
+        if(app.isRunning())
+        {
+            app.decrementUndergoingServiceCount();
+            Platform.runLater(() -> app.addUpdate(endMessage));
+        }
         
     }
 

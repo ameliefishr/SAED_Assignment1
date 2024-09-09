@@ -117,7 +117,7 @@ public class Plane
         setVisibility(true); // make plane visible
 
         //checking if a destination exists and that the plane isn't already there
-        if(destinationAirport != null && destinationAirport.isRunning())
+        if(destinationAirport != null && destinationAirport.isRunning() && app.isRunning())
         {
             int destinationId = destinationAirport.getId();
             if(xPos != destinationAirport.getX() && yPos != destinationAirport.getY())
@@ -130,11 +130,11 @@ public class Plane
                 int movementY = Integer.compare(destinationAirport.getY(), yPos); 
 
                 // move towards the destination in a loop until it is reached
-                while (xPos != destinationAirport.getX() || yPos != destinationAirport.getY() && destinationAirport.isRunning())
+                while (xPos != destinationAirport.getX() || yPos != destinationAirport.getY() && destinationAirport.isRunning() && app.isRunning())
                 {
                     if(!app.isRunning() || !destinationAirport.isRunning())
                     {   
-                        break; // stop movement if simulation stops
+                        break; // stop movement if simulation stops and freeze at last position
                     }
                     if (xPos != destinationAirport.getX())
                     {
@@ -163,7 +163,7 @@ public class Plane
                     }
 
                     // once plane has reached new destination
-                    if(destinationAirport.isRunning()) // check of airport is still running (not shutdown)
+                    if(destinationAirport.isRunning() && app.isRunning()) // check of airport is still running (not shutdown)
                     {
                         Platform.runLater(() -> app.addUpdate("Plane " + this.id + " has landed at Airport " + destinationId));
                         setCurrentAirport(destinationAirport);
@@ -172,7 +172,10 @@ public class Plane
                         app.incrementCompletedFlightsCount();
                     }
             }
-            setVisibility(false); //once landed, make plane invisible
+            if(app.isRunning()) // if loop was exited because flight was completed and not in the case of app ending
+            {
+                setVisibility(false); //once landed, make plane invisible
+            }
         }
         else
         {
