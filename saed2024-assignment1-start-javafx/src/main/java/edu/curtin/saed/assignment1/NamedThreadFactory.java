@@ -3,6 +3,7 @@ package edu.curtin.saed.assignment1;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// NamedThreadFactory Class
 // this is just a class to help me label my thread pools for debugging, it is not used at all in the simulation
 // code was adapted from: https://stackoverflow.com/questions/6113746/naming-threads-and-thread-pools-of-executorservice
 public class NamedThreadFactory implements ThreadFactory

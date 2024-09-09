@@ -7,8 +7,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-// this class is responsible for managing all of
-// the airports and their flight requests
+// Airport Manager
+// this class is responsible for managing all of the airports and their flight requests
+// allows other classes to easily communicate with a specific airport
 public class AirportManager
 {
     // initializing class variables

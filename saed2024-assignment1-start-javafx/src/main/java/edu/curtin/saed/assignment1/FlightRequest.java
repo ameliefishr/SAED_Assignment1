@@ -1,6 +1,9 @@
 package edu.curtin.saed.assignment1;
 import java.io.*;
 
+// Flight Request Class
+// Responsible for generating flight requests and passing them off to the thread's associated airport
+
 public class FlightRequest implements Runnable
 {
     private int nAirports; // command input

@@ -2,7 +2,8 @@ package edu.curtin.saed.assignment1;
 
 import java.io.*;
 
-
+// Service class
+// Runs service process on provided plane 
 public class Service implements Runnable
 {
     private int planeId; // command input

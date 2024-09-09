@@ -9,6 +9,9 @@ import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 
+// Airport Class
+// Responsible for bulk of the simulation logic, handles receiving and departing planes, running services and consuming flight requests
+
 public class Airport implements Runnable
 {
     // initializing variables
@@ -250,11 +253,11 @@ public class Airport implements Runnable
 
         catch (InterruptedException e)
         {
-            servicePool.shutdownNow(); // if it's interrupt still make sure it shuts down properly
+            servicePool.shutdownNow(); // if it's interrupted still make sure it shuts down properly
             Thread.currentThread().interrupt();
         }
 
-        // passing poison object to blocking queue's
+        // passing poison object to blocking queue's to signal end
         try
         {
             putNextFlightRequest(FlightRequest.POISON);

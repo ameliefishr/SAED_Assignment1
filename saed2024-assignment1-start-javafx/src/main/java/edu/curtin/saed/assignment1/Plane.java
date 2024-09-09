@@ -4,6 +4,9 @@ import java.util.Random;
 
 import javafx.application.Platform;
 
+
+// Plane class
+// Plane object that handles it's own flight movement logic and gets passed between airports/processors
 public class Plane
 {
     private int id;
@@ -111,21 +114,26 @@ public class Plane
         });
     }
 
-     // movement logic was inspired from here: https://gamedev.stackexchange.com/questions/68790/how-can-i-move-an-object-towards-another-along-a-straight-line
+     // movement logic was inspired from here: https://stackoverflow.com/questions/3594731/calculating-direction-based-on-point-offsets
     public void flyToDestination()
     {
         setVisibility(true); // make plane visible
 
-        //checking if a destination exists and that the plane isn't already there
+        //checking if a destination exists
         if(destinationAirport != null && destinationAirport.isRunning() && app.isRunning())
         {
             int destinationId = destinationAirport.getId();
+
+            // checking that plane isnt already at destination
             if(xPos != destinationAirport.getX() && yPos != destinationAirport.getY())
             {
-                app.incrementInFlightCount();
+                app.incrementInFlightCount(); // update UI status display
                 Platform.runLater(() -> app.addUpdate("Plane " + this.id + " has begun flying to Airport " + destinationId));
                 
-                // calculate direction movements based on current position
+                // calculate direction movements based on the difference in position
+                // if -1 = move right/up
+                // if 0 = no movement
+                // if 1 = move left/down
                 int movementX = Integer.compare(destinationAirport.getX(), xPos);
                 int movementY = Integer.compare(destinationAirport.getY(), yPos); 
 
@@ -136,6 +144,8 @@ public class Plane
                     {   
                         break; // stop movement if simulation stops and freeze at last position
                     }
+
+                    // adjust planes coordinates based on the movement direction
                     if (xPos != destinationAirport.getX())
                     {
                         xPos += movementX;
@@ -153,11 +163,12 @@ public class Plane
                     });
                         try
                         {
-                            Thread.sleep(100); 
+                            // 10 milliseconds so 0.1 second, this means the ui will update the planes position 10x per 1 second
+                            Thread.sleep(100); // sleep thread to delay planes movement
                         }
                         catch (InterruptedException e)
                         {
-                            Thread.currentThread().interrupt();
+                            Thread.currentThread().interrupt(); // not checking Plane, but whatever thread this function in called in
                             break; // exit loop if thread is interrupted
                         }
                     }
